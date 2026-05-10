@@ -1,0 +1,101 @@
+# NorskhetsBench standard prompts.
+# 25 prompts × 5 register categories. Same for every benchmarked model.
+# Each prompt asks for ≥150 words of Norwegian Bokmål output.
+
+settings:
+  target_min_words: 150
+  target_max_words: 400
+  language: "nb"
+  decode:
+    max_new_tokens: 512
+    do_sample: false  # deterministic / greedy by default
+    temperature: 0.0
+    top_p: 1.0
+    repetition_penalty: 1.0
+
+prompts:
+
+  # ---- Editorial / opinion ----
+  - id: ed01
+    register: editorial
+    text: "Skriv et kort lederinnlegg på norsk bokmål om hvorfor offentlig sektor bør være forsiktig med å innføre KI-systemer som ikke er språklig kvalitetssikret. Skriv mellom 200 og 300 ord."
+  - id: ed02
+    register: editorial
+    text: "Skriv en kort kommentar på norsk bokmål om hvorfor papiraviser fortsatt har en rolle i 2026, til tross for at de fleste leser nyheter på nett. Mellom 200 og 300 ord."
+  - id: ed03
+    register: editorial
+    text: "Skriv et debattinnlegg på norsk bokmål der du argumenterer mot at norske kommuner skal kjøpe ferdige KI-løsninger uten å forstå hvordan de fungerer. Mellom 200 og 300 ord."
+  - id: ed04
+    register: editorial
+    text: "Skriv en kort kronikk på norsk bokmål om hvorfor barn bør lære å skrive for hånd, ikke bare på tastatur. Mellom 200 og 300 ord."
+  - id: ed05
+    register: editorial
+    text: "Skriv en kort kommentar på norsk bokmål om hvorfor det er viktig at kollektivtrafikken i norske byer er rimelig, ikke bare effektiv. Mellom 200 og 300 ord."
+
+  # ---- Personal essay / narrative ----
+  - id: pe01
+    register: personal
+    text: "Skriv en personlig tekst på norsk bokmål om en barndomsminne du har fra en sommer på fjellet. Bruk en avslappet, fortellende tone. Mellom 200 og 300 ord."
+  - id: pe02
+    register: personal
+    text: "Skriv en kort tekst på norsk bokmål om hvordan du opplevde å flytte for første gang. Bruk vanlig hverdagsspråk. Mellom 200 og 300 ord."
+  - id: pe03
+    register: personal
+    text: "Skriv en personlig tekst på norsk bokmål om en samtale du hadde med en bestefar eller bestemor som du tenker på fortsatt. Mellom 200 og 300 ord."
+  - id: pe04
+    register: personal
+    text: "Skriv en kort tekst på norsk bokmål der du beskriver en tur du har vært på som ikke gikk som planlagt. Bruk fortellende tone. Mellom 200 og 300 ord."
+  - id: pe05
+    register: personal
+    text: "Skriv en personlig tekst på norsk bokmål om hvorfor du liker eller ikke liker desember måned. Mellom 200 og 300 ord."
+
+  # ---- Technical / explanation ----
+  - id: te01
+    register: technical
+    text: "Forklar på norsk bokmål, til en interessert ikke-spesialist, hva en stor språkmodell er og hvordan den genererer tekst. Mellom 200 og 300 ord."
+  - id: te02
+    register: technical
+    text: "Forklar på norsk bokmål hvordan en bankoverføring mellom to norske banker faktisk fungerer i praksis (BankID, oppgjør, settlement). Mellom 200 og 300 ord."
+  - id: te03
+    register: technical
+    text: "Forklar på norsk bokmål for en ungdomsskoleelev hvordan vaksiner virker i kroppen. Mellom 200 og 300 ord."
+  - id: te04
+    register: technical
+    text: "Forklar på norsk bokmål hva forskjellen er mellom utleie og fremleie i en norsk kontekst, og når det ene er lov og det andre ikke. Mellom 200 og 300 ord."
+  - id: te05
+    register: technical
+    text: "Forklar på norsk bokmål hvordan en husholdning kan beregne sitt eget strømforbruk i kroner per måned, gitt en spotprisavtale. Mellom 200 og 300 ord."
+
+  # ---- Argumentative / persuasive ----
+  - id: ar01
+    register: argumentative
+    text: "Skriv en kort argumenterende tekst på norsk bokmål om hvorfor norske bedrifter bør kreve at KI-leverandører dokumenterer hvordan de håndterer norsk språk. Mellom 200 og 300 ord."
+  - id: ar02
+    register: argumentative
+    text: "Argumenter på norsk bokmål for at det bør innføres lavere fartsgrense i tettsteder. Mellom 200 og 300 ord."
+  - id: ar03
+    register: argumentative
+    text: "Argumenter på norsk bokmål mot at universitetene bør innføre obligatorisk fremmøte i forelesninger. Mellom 200 og 300 ord."
+  - id: ar04
+    register: argumentative
+    text: "Skriv en kort argumenterende tekst på norsk bokmål for hvorfor barneskoler ikke bør bruke nettbrett for lavere klassetrinn. Mellom 200 og 300 ord."
+  - id: ar05
+    register: argumentative
+    text: "Argumenter på norsk bokmål for hvorfor flere selskaper bør tillate fjernarbeid permanent, ikke bare som en korona-arv. Mellom 200 og 300 ord."
+
+  # ---- Letter / formal correspondence ----
+  - id: le01
+    register: letter
+    text: "Skriv et brev på norsk bokmål fra en kunde til et strømselskap der kunden klager over en uforutsett prisøkning og ber om en konkret forklaring. Mellom 200 og 300 ord."
+  - id: le02
+    register: letter
+    text: "Skriv en e-post på norsk bokmål fra en ansatt til sin sjef der den ansatte foreslår å innføre fast hjemmekontordag på fredager. Mellom 200 og 300 ord."
+  - id: le03
+    register: letter
+    text: "Skriv et formelt brev på norsk bokmål fra en velforening til kommunen om en farlig fotgjengerovergang i nabolaget. Mellom 200 og 300 ord."
+  - id: le04
+    register: letter
+    text: "Skriv en e-post på norsk bokmål fra en lærer til foreldrene i en klasse der læreren orienterer om en kommende leirskoletur. Mellom 200 og 300 ord."
+  - id: le05
+    register: letter
+    text: "Skriv et brev på norsk bokmål fra en pasient til fastlegen sin der pasienten ber om en henvisning og forklarer hvorfor. Mellom 200 og 300 ord."

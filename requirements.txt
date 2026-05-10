@@ -1,0 +1,23 @@
+# Core NORI dependencies. Install with:
+#   pip install -r requirements.txt
+#   python -m spacy download nb_core_news_md
+
+# NLP and metrics
+spacy>=3.7
+sacrebleu>=2.4
+numpy>=1.26
+scipy>=1.11
+
+# Model panel (for `make generate`)
+torch>=2.1
+transformers>=4.40
+peft>=0.10
+bitsandbytes>=0.43
+accelerate>=0.30
+
+# Data acquisition
+datasets>=2.18
+huggingface_hub>=0.20
+
+# Config
+pyyaml>=6.0

@@ -1,0 +1,38 @@
+# NORI .gitignore
+
+# Reference corpus (regenerable via `make data`; large, also avoids
+# redistributing Wikipedia content even under CC-BY-SA)
+data/reference/wikipedia_no.jsonl
+data/reference/gutenberg_no.jsonl
+
+# Model generations (regenerable via `make generate`)
+data/outputs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Logs
+logs/
+*.log
+
+# Local env
+.env
+.venv/
+
+# Optional paper/whitepaper directory (not part of the benchmark itself)
+paper/
