@@ -1,12 +1,14 @@
 # NORI .gitignore
 
-# Reference corpus (regenerable via `make data`; large, also avoids
-# redistributing Wikipedia content even under CC-BY-SA)
-data/reference/wikipedia_no.jsonl
-data/reference/gutenberg_no.jsonl
+# Reference corpora (regenerable via `make data` / `make data-nb` / `make data-nn`;
+# large, also avoids redistributing Wikipedia content even under CC-BY-SA)
+data/reference/wikipedia_*.jsonl
+data/reference/gutenberg_*.jsonl
+data/reference/sewiki-*.bz2
 
 # Model generations (regenerable via `make generate`)
 data/outputs/
+data/outputs_nn/
 
 # Python
 __pycache__/
