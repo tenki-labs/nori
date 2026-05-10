@@ -454,19 +454,44 @@ def aggregate(metrics: list[TextMetrics]) -> CorpusMetrics:
 # ----------------------------------------------------------------------------
 
 @dataclass
-class NorskhetsScore:
+class NoriScore:
     """Per-axis normalized scores comparing measurement to native reference.
 
     Each axis is in [0, 1] where 1 = matches native, 0 = far from native.
-    The composite is the mean of the five axes.
+
+    Three single-number aggregates are reported:
+
+        nori_score : arithmetic mean of the five axes, scaled to [0, 100].
+                     This is the headline number, analogous to MMLU/GLUE/MTEB.
+        nori_min   : the lowest of the five axes, scaled to [0, 100].
+                     Useful as a "weakest link" indicator: a model with
+                     four axes at 0.9 and one at 0.0 would have nori_score
+                     of 72 but nori_min of 0, which is closer to how a native
+                     reader experiences the output.
+        nori_g     : geometric mean of the five axes, scaled to [0, 100].
+                     Penalizes weak axes more aggressively than arithmetic
+                     mean. A near-zero axis pulls nori_g toward zero even
+                     if other axes are strong.
+
+    nori_score is the canonical headline. nori_min and nori_g are reported
+    alongside it for diagnostic and bottleneck analysis.
     """
     explicitation: float = 0.0       # connectives_per_1k_words distance
     normalization: float = 0.0       # std/p90 sentence length distance
     simplification: float = 0.0      # MTTR-1000 + word length distance
     levelling_out: float = 0.0       # sentence-length variance distance
     interference: float = 0.0        # em-dash + V2 + compound rates
-    composite: float = 0.0
+
+    composite: float = 0.0           # mean of axes in [0, 1] (legacy field)
+    nori_score: float = 0.0          # arithmetic mean × 100, the headline
+    nori_min: float = 0.0            # min axis × 100, weakest-link indicator
+    nori_g: float = 0.0              # geometric mean × 100, bottleneck-penalizing
+
     raw: dict = field(default_factory=dict)
+
+
+# Backwards-compatible alias for any external code that imported the old name.
+NorskhetsScore = NoriScore
 
 
 def _smooth_score(observed: float, reference: float, tolerance: float) -> float:
@@ -480,10 +505,10 @@ def _smooth_score(observed: float, reference: float, tolerance: float) -> float:
     return max(0.0, 1.0 - math.tanh(delta / max(tolerance, 1e-9)))
 
 
-def score(model_metrics: CorpusMetrics, native_ref: CorpusMetrics) -> NorskhetsScore:
-    """Compute NorskhetsBench score for a model's output corpus against the
-    native Norwegian reference corpus."""
-    s = NorskhetsScore()
+def score(model_metrics: CorpusMetrics, native_ref: CorpusMetrics) -> NoriScore:
+    """Compute NORI score for a model's output corpus against the native
+    Norwegian reference corpus."""
+    s = NoriScore()
 
     # Eksplisittering: connectives per 1k words; LLM tends to over-produce
     s.explicitation = _smooth_score(
@@ -532,10 +557,22 @@ def score(model_metrics: CorpusMetrics, native_ref: CorpusMetrics) -> NorskhetsS
     )
     s.interference = round((em_score + v2_score + comp_score) / 3, 4)
 
-    s.composite = round(
-        (s.explicitation + s.normalization + s.simplification + s.levelling_out + s.interference) / 5,
-        4
-    )
+    axes = [s.explicitation, s.normalization, s.simplification,
+            s.levelling_out, s.interference]
+    arithmetic_mean = sum(axes) / len(axes)
+    s.composite = round(arithmetic_mean, 4)            # legacy [0, 1]
+    s.nori_score = round(arithmetic_mean * 100, 2)      # headline [0, 100]
+    s.nori_min = round(min(axes) * 100, 2)              # weakest-link [0, 100]
+
+    # Geometric mean. Use a small epsilon floor so a single zero axis still
+    # results in a near-zero geometric mean rather than an exact zero (which
+    # would erase any signal from the other axes).
+    import math
+    eps = 1e-3
+    log_sum = sum(math.log(max(a, eps)) for a in axes)
+    geom = math.exp(log_sum / len(axes))
+    s.nori_g = round(geom * 100, 2)
+
     s.raw = {
         "model": _to_dict(model_metrics),
         "native_ref": _to_dict(native_ref),

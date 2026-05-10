@@ -75,12 +75,17 @@ def main():
 
     scorecard = {"native_baseline": _to_dict(native), "models": {}}
     md_lines = []
-    md_lines.append("# NorskhetsBench scorecard\n")
-    md_lines.append("Higher per-axis score = closer to native Norwegian (1.0 = matches "
-                    "native distribution within tolerance).\n")
-    md_lines.append("| Model | composite | explicitation | normalization | "
-                    "simplification | levelling | interference |")
-    md_lines.append("|---|---:|---:|---:|---:|---:|---:|")
+    md_lines.append("# NORI scorecard\n")
+    md_lines.append("**NORI score** is the headline number: arithmetic mean of "
+                    "the five axes, scaled to [0, 100]. Higher is more native. "
+                    "Per-axis scores are in [0, 1] where 1.0 matches the native "
+                    "distribution within tolerance.\n")
+    md_lines.append("`nori_min` = lowest axis × 100 (weakest-link indicator).  "
+                    "`nori_g` = geometric mean × 100 (penalizes weak axes).\n")
+    md_lines.append("| Model | NORI score | nori_min | nori_g | "
+                    "explicitation | normalization | simplification | "
+                    "levelling | interference |")
+    md_lines.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|")
 
     for model_dir in sorted(OUT_DIR.iterdir()):
         if not model_dir.is_dir():
@@ -106,16 +111,21 @@ def main():
         print(f"  modal particles/1k: {cm.modal_particles_per_1k_words}")
         print(f"  connectives/1k:     {cm.connectives_per_1k_words}")
         print(f"  compound integrity: {cm.compound_integrity_rate}")
-        print(f"  → composite score:  {sc.composite}")
+        print(f"  -> NORI score:       {sc.nori_score}/100")
+        print(f"     nori_min:         {sc.nori_min}/100  (weakest axis)")
+        print(f"     nori_g:           {sc.nori_g}/100   (geometric mean)")
+        print(f"     [legacy composite]: {sc.composite}")
         print(f"      eksplisittering: {sc.explicitation}")
         print(f"      normalisering:   {sc.normalization}")
         print(f"      forenkling:      {sc.simplification}")
         print(f"      utjevning:       {sc.levelling_out}")
         print(f"      interferens:     {sc.interference}")
-        md_lines.append(f"| {model_id} | **{sc.composite}** | "
-                        f"{sc.explicitation} | {sc.normalization} | "
-                        f"{sc.simplification} | {sc.levelling_out} | "
-                        f"{sc.interference} |")
+        md_lines.append(
+            f"| {model_id} | **{sc.nori_score:.1f}** | {sc.nori_min:.1f} | "
+            f"{sc.nori_g:.1f} | {sc.explicitation:.3f} | {sc.normalization:.3f} | "
+            f"{sc.simplification:.3f} | {sc.levelling_out:.3f} | "
+            f"{sc.interference:.3f} |"
+        )
 
     out_json = RESULTS / "scorecard.json"
     out_md = RESULTS / "scorecard.md"
