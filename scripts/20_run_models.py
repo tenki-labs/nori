@@ -1,5 +1,5 @@
-"""Generate Norwegian Bokmål text from each benchmarked model on the standard
-prompt set. Outputs are saved as data/outputs/<model_id>/<prompt_id>.txt.
+"""Generate Norwegian text from each benchmarked model on the standard prompt
+set. Outputs are saved per language under data/outputs[_<lang>]/<model_id>/<prompt_id>.txt.
 
 Then 30_score.py measures and scores them.
 """
@@ -19,8 +19,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _repro import seed_all, project_root  # noqa: E402
 
 ROOT = project_root()
-OUT_DIR = ROOT / "data" / "outputs"
-OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Model panel: keep additive. Same structure as the BNCR study.
 MODELS = [
@@ -29,11 +27,24 @@ MODELS = [
 ]
 
 
-def load_prompts():
+def load_prompts(lang: str):
     import yaml
-    with open(ROOT / "configs" / "prompts.yaml", encoding="utf-8") as f:
+    fname = "prompts.yaml" if lang == "nb" else "prompts_nn.yaml"
+    with open(ROOT / "configs" / fname, encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     return cfg["settings"], cfg["prompts"]
+
+
+SYSTEM_PROMPTS = {
+    "nb": ("Du er en dyktig norsk skribent. Svar på norsk bokmål. "
+           "Skriv naturlig, idiomatisk norsk i hverdagsregister, ikke "
+           "stiv oversettelses-norsk. Unngå tankestreker (—) og "
+           "særskriving av sammensatte ord."),
+    "nn": ("Du er ein dyktig norsk skribent. Svar på nynorsk. "
+           "Skriv naturleg, idiomatisk nynorsk i kvardagsregister, ikkje "
+           "stiv omsetjings-norsk. Unngå tankestrekar (—) og "
+           "særskriving av samansette ord."),
+}
 
 
 def load_model(spec):
@@ -61,14 +72,10 @@ def load_model(spec):
     return model, tok
 
 
-def generate(model, tok, prompt: str, settings: dict) -> str:
+def generate(model, tok, prompt: str, settings: dict, lang: str = "nb") -> str:
     import torch
     msgs = [
-        {"role": "system",
-         "content": ("Du er en dyktig norsk skribent. Svar på norsk bokmål. "
-                     "Skriv naturlig, idiomatisk norsk i hverdagsregister, ikke "
-                     "stiv oversettelses-norsk. Unngå tankestreker (—) og "
-                     "særskriving av sammensatte ord.")},
+        {"role": "system", "content": SYSTEM_PROMPTS[lang]},
         {"role": "user", "content": prompt},
     ]
     s = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
@@ -89,13 +96,22 @@ def generate(model, tok, prompt: str, settings: dict) -> str:
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--lang", choices=("nb", "nn"), default="nb",
+                    help="Language pack: 'nb' Bokmaal (default), 'nn' Nynorsk.")
+    args = ap.parse_args()
+
     seed_all(42)
-    settings, prompts = load_prompts()
-    print(f"NorskhetsBench: {len(prompts)} prompts × {len(MODELS)} models = "
+    out_root = ROOT / "data" / ("outputs" if args.lang == "nb" else "outputs_nn")
+    out_root.mkdir(parents=True, exist_ok=True)
+
+    settings, prompts = load_prompts(args.lang)
+    print(f"NORI ({args.lang}): {len(prompts)} prompts × {len(MODELS)} models = "
           f"{len(prompts) * len(MODELS)} generations\n")
 
     for spec in MODELS:
-        out_dir = OUT_DIR / spec["id"]
+        out_dir = out_root / spec["id"]
         out_dir.mkdir(parents=True, exist_ok=True)
         print(f"\n=== Model: {spec['id']} ({spec['hf']}) ===")
         t0 = time.time()
@@ -105,6 +121,7 @@ def main():
         meta = {
             "model_id": spec["id"], "hf": spec["hf"],
             "load_seconds": round(load_s, 1),
+            "lang": args.lang,
             "settings": settings,
             "generations": [],
         }
@@ -115,7 +132,7 @@ def main():
                 continue
             t1 = time.time()
             try:
-                txt = generate(model, tok, p["text"], settings)
+                txt = generate(model, tok, p["text"], settings, lang=args.lang)
             except Exception as e:
                 txt = f"[GENERATION ERROR: {type(e).__name__}: {e}]"
             elapsed = time.time() - t1

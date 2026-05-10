@@ -1,58 +1,14 @@
 {
-  "wikipedia_no": {
+  "wikipedia_nn": {
     "license": "CC-BY-SA-4.0",
-    "source": "wikimedia/wikipedia 20231101.no",
+    "source": "wikimedia/wikipedia 20231101.nn",
     "config": {
       "min_chars": 1500,
       "max_chars": 6000,
       "n_target": 1500,
       "n_actual": 1500
     },
-    "file": "data\\reference\\wikipedia_no.jsonl",
-    "sha256": "b11731c06e3a7d63d629411ebc78229629c2da55be0fda4e3494c35e8a3cdb88"
-  },
-  "gutenberg_no": {
-    "license": "Public domain",
-    "source": "Project Gutenberg",
-    "files": [
-      {
-        "gid": "33012",
-        "author": "Bjornstjerne Bjornson",
-        "title": "Synnove Solbakken",
-        "url": "https://www.gutenberg.org/files/33012/33012.txt",
-        "chars": 727831
-      },
-      {
-        "gid": "36205",
-        "author": "Knut Hamsun",
-        "title": "Sult",
-        "url": "https://www.gutenberg.org/files/36205/36205-0.txt",
-        "chars": 575350
-      },
-      {
-        "gid": "28208",
-        "author": "Henrik Ibsen",
-        "title": "Vildanden",
-        "url": "https://www.gutenberg.org/files/28208/28208-0.txt",
-        "chars": 748065
-      },
-      {
-        "gid": "31881",
-        "author": "Jonas Lie",
-        "title": "Familjen paa Gilje",
-        "url": "https://www.gutenberg.org/cache/epub/31881/pg31881.txt",
-        "chars": 1022951
-      },
-      {
-        "gid": "28036",
-        "author": "Alexander Kielland",
-        "title": "Garman & Worse",
-        "url": "https://www.gutenberg.org/files/28036/28036.txt",
-        "chars": 510443
-      }
-    ],
-    "output": "data\\reference\\gutenberg_no.jsonl",
-    "sha256": "0a0b6fc336683b99b0fde776ee44472155095de2b97a00965fb46d427e9815d5",
-    "n_works": 5
+    "file": "data\\reference\\wikipedia_nn.jsonl",
+    "sha256": "8ebd27748533594f9208f3d917267aa87b0fed03786f6d9487785776bdaa4eb2"
   }
 }

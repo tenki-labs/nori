@@ -32,7 +32,11 @@ from collections import Counter
 from dataclasses import dataclass, field
 from typing import Iterable
 
-# Lazy NLP load
+# Lazy NLP load. NORI uses spaCy nb_core_news_md for both BM and NN: there is
+# no spaCy NN model, but nb_core_news_md handles NN well enough for our
+# dependency-structure needs (V2 root identification, constituent counting).
+# POS tags can be noisy on NN-specific morphology, but we don't depend on POS
+# fine-grained classes for the headline measurements.
 _NLP = None
 def _get_nlp():
     global _NLP
@@ -45,33 +49,88 @@ def _get_nlp():
 WORD_RE = re.compile(r"[\wÀ-ɏ̀-ͯ]+", re.UNICODE)
 SENTENCE_END_RE = re.compile(r"[.!?]+(?:\s|$)")
 
-# Norwegian "modal particles" / discourse particles characteristic of native
-# Norwegian and underused in translatese.
-MODAL_PARTICLES = {
-    "jo", "da", "vel", "nok", "altså", "vel", "visst", "nemlig",
-    "egentlig", "faktisk", "kanskje", "selvsagt", "selvfølgelig",
-}
 
-# Explicit logical connectives. High density = explicitation (translation
-# universal):translated text spells out logic that native text leaves implicit.
-EXPLICIT_CONNECTIVES = {
-    "fordi", "derfor", "dermed", "altså", "således", "følgelig",
-    "ettersom", "siden", "som følge av", "dvs", "det vil si",
-    "med andre ord", "for eksempel", "f.eks", "først og fremst",
-    "i tillegg", "videre", "imidlertid", "likevel",
-    "på den ene side", "på den andre side",
-    "først", "deretter", "endelig", "til slutt",
-}
+# ----------------------------------------------------------------------------
+# Language packs
+# ----------------------------------------------------------------------------
 
-# Subordinators:used to detect whether a clause is subordinate (V2 doesn't
-# apply to subordinates; verb is at the end in many Germanic V2 languages,
-# though Norwegian is more flexible).
-SUBORDINATORS = {
-    "at", "om", "da", "når", "før", "etter", "mens", "fordi", "siden",
-    "ettersom", "selv om", "hvis", "dersom", "uten at", "for at",
-    "slik at", "sånn at", "enda", "fastsom", "fast",
-    "som", "hva", "hvem", "hvor", "hvordan", "hvilken", "hvilket", "hvilke",
-}
+@dataclass(frozen=True)
+class LangPack:
+    """Per-language lexicons for the language-sensitive metric components.
+
+    The structural metrics (em-dash density, V2 violations, compound integrity,
+    sentence length, lexical diversity, mean word length) are language-agnostic
+    and use the spaCy parser only. The four lexicons here are the parts that
+    differ between Bokmaal and Nynorsk.
+    """
+    code: str  # "nb" or "nn"
+    name: str
+    modal_particles: frozenset
+    explicit_connectives: frozenset
+    subordinators: frozenset
+
+
+# Bokmaal modal particles, connectives, subordinators.
+BOKMAAL = LangPack(
+    code="nb",
+    name="Norsk bokmål",
+    modal_particles=frozenset({
+        "jo", "da", "vel", "nok", "altså", "visst", "nemlig",
+        "egentlig", "faktisk", "kanskje", "selvsagt", "selvfølgelig",
+    }),
+    explicit_connectives=frozenset({
+        "fordi", "derfor", "dermed", "altså", "således", "følgelig",
+        "ettersom", "siden", "som følge av", "dvs", "det vil si",
+        "med andre ord", "for eksempel", "f.eks", "først og fremst",
+        "i tillegg", "videre", "imidlertid", "likevel",
+        "på den ene side", "på den andre side",
+        "først", "deretter", "endelig", "til slutt",
+    }),
+    subordinators=frozenset({
+        "at", "om", "da", "når", "før", "etter", "mens", "fordi", "siden",
+        "ettersom", "selv om", "hvis", "dersom", "uten at", "for at",
+        "slik at", "sånn at", "enda",
+        "som", "hva", "hvem", "hvor", "hvordan", "hvilken", "hvilket", "hvilke",
+    }),
+)
+
+
+# Nynorsk modal particles, connectives, subordinators. Many overlap with BM,
+# but NN has distinctive forms (kvifor, ikkje, av di, jamvel om, etc.).
+NYNORSK = LangPack(
+    code="nn",
+    name="Norsk nynorsk",
+    modal_particles=frozenset({
+        "jo", "då", "vel", "nok", "altså", "visst", "nemleg",
+        "eigentleg", "faktisk", "kanskje", "sjølvsagt", "sjølvsagde",
+        "no",  # "no" in NN is the temporal particle similar to BM "nå"
+    }),
+    explicit_connectives=frozenset({
+        "av di", "difor", "dimed", "altså", "soleis", "følgjeleg",
+        "ettersom", "sidan", "som følgje av", "dvs", "det vil seie",
+        "med andre ord", "til dømes", "t.d.", "først og fremst",
+        "i tillegg", "vidare", "likevel", "samstundes",
+        "på den eine sida", "på den andre sida",
+        "først", "deretter", "til slutt",
+    }),
+    subordinators=frozenset({
+        "at", "om", "då", "når", "før", "etter", "medan", "av di", "sidan",
+        "ettersom", "jamvel om", "viss", "dersom", "utan at", "for at",
+        "slik at", "så at", "endå",
+        "som", "kva", "kven", "kvar", "korleis", "kva for ein",
+        "kva for ei", "kva for eit", "kva for nokre",
+    }),
+)
+
+
+LANG_PACKS = {"nb": BOKMAAL, "nn": NYNORSK}
+
+
+# Backwards-compatible aliases for code that imported these directly. Default
+# to Bokmaal, matching the pre-1.0.0 behavior.
+MODAL_PARTICLES = BOKMAAL.modal_particles
+EXPLICIT_CONNECTIVES = BOKMAAL.explicit_connectives
+SUBORDINATORS = BOKMAAL.subordinators
 
 
 # ----------------------------------------------------------------------------
@@ -226,8 +285,19 @@ def _detect_compound_separation(doc) -> tuple[int, int]:
     return candidates, suspected
 
 
-def measure_text(text: str) -> TextMetrics:
-    """Compute all metrics for a single piece of text."""
+def measure_text(text: str, lang: str = "nb") -> TextMetrics:
+    """Compute all metrics for a single piece of text.
+
+    `lang` selects the language pack ("nb" for Bokmaal, "nn" for Nynorsk).
+    The pack determines which words count as modal particles, explicit
+    connectives, and subordinators. Structural metrics (em-dash, V2,
+    compound integrity, sentence/word lengths, lexical diversity) are
+    language-agnostic.
+    """
+    pack = LANG_PACKS.get(lang)
+    if pack is None:
+        raise ValueError(f"Unknown lang code {lang!r}. Use 'nb' or 'nn'.")
+
     text = _norm(text)
     if not text:
         return TextMetrics()
@@ -310,14 +380,14 @@ def measure_text(text: str) -> TextMetrics:
     m.content_word_ratio = round(content_count / total_alpha, 4) if total_alpha else 0.0
 
     # Modal particles
-    mp_count = sum(1 for w in word_lower if w in MODAL_PARTICLES)
+    mp_count = sum(1 for w in word_lower if w in pack.modal_particles)
     m.modal_particle_count = mp_count
     m.modal_particles_per_1k_words = round(mp_count / m.n_words * 1000, 3) if m.n_words else 0.0
 
     # Explicit connectives (multi-word: check both single and bigram match)
     text_lower = text.lower()
     conn_count = 0
-    for c in EXPLICIT_CONNECTIVES:
+    for c in pack.explicit_connectives:
         # Word-boundary match
         pat = r"\b" + re.escape(c) + r"\b"
         conn_count += len(re.findall(pat, text_lower))

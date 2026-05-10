@@ -2,30 +2,41 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
-[![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](CHANGELOG.md)
 [![Validate submission](https://github.com/tenki-labs/nori/actions/workflows/validate-submission.yml/badge.svg)](https://github.com/tenki-labs/nori/actions/workflows/validate-submission.yml)
 
 **NOR**wegian **I**diomatic. A reproducible benchmark that measures how natively Norwegian an LLM's Norwegian output actually is.
 
 NORI scores generated text against a reference distribution of native Norwegian on five axes drawn from translation studies, the field that has spent thirty years naming the structural signatures of translated text. Standard Norwegian LLM evaluation (NorEval, FLORES-style chrF/BLEU) measures whether the model produces correct words. NORI measures whether the model produces *Norwegian* words in *Norwegian* structure, or whether it produces translatese: grammatically correct Norwegian words arranged in English-shaped sentences.
 
-## Leaderboard
+## Leaderboards
 
-The headline number is **NORI score** (`[0, 100]`, higher is more native Norwegian). It is the arithmetic mean of the five axes scaled to a percentage, analogous to MMLU and GLUE. Two diagnostic aggregates accompany it:
+NORI v1.0 ships two parallel benchmarks: **NORI** for Bokmaal and **NORI-NN** for Nynorsk. They share the same five-axis framework and scoring formula but use language-specific lexicons (modal particles, connectives, subordinators) and reference distributions.
+
+The headline number on each is the **NORI score** (`[0, 100]`, higher is more native Norwegian): arithmetic mean of the five axes scaled to a percentage, analogous to MMLU and GLUE. Two diagnostic aggregates accompany it:
 
 * `nori_min` is the lowest of the five axes × 100. A weakest-link indicator: a model with four strong axes and one near-zero axis still feels translated to a native reader.
 * `nori_g` is the geometric mean × 100. Penalizes weak axes much more than the arithmetic mean and is closer to how a human reader perceives an output: one bad axis pulls the whole impression down.
+
+### NORI (Bokmaal)
 
 | Rank | Model | NORI | nori_min | nori_g | Eksplisittering | Normalisering | Forenkling | Utjevning | Interferens |
 |---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
 | 1 | qwen25-1_5b-instruct | **39.7** | 5.0 | 27.8 | 0.661 | 0.263 | 0.050 | 0.250 | 0.760 |
 | 2 | qwen25-3b-instruct | **34.9** | 0.7 | 14.2 | 0.777 | 0.214 | 0.007 | 0.074 | 0.673 |
 
-*(NORI v0.1.0 baseline. Greedy decoding, single seed, 25-prompt standard set. Per-axis scores are in `[0, 1]`, where 1.0 matches the native distribution within tolerance.)*
+### NORI-NN (Nynorsk)
 
-The two `nori_min` values illustrate why the secondary metric matters: both models score 14 to 35 on the geometric mean and 0.7 to 5.0 on the weakest-link indicator, even though the headline arithmetic mean is in the mid-30s. A native reader who hits the simplification axis (heavy lexical repetition) will perceive that single failure even when other axes are strong.
+| Rank | Model | NORI-NN | nori_min | nori_g | Eksplisittering | Normalisering | Forenkling | Utjevning | Interferens |
+|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | qwen25-1_5b-instruct | **35.5** | 0.9 | 19.3 | 0.486 | 0.371 | 0.009 | 0.258 | 0.653 |
+| 2 | qwen25-3b-instruct | **23.9** | 0.1 | 4.4 | 0.375 | 0.004 | 0.001 | 0.104 | 0.709 |
 
-To submit a new model to the leaderboard, see [CONTRIBUTING.md](CONTRIBUTING.md). The leaderboard updates on merged PRs that add submissions to `data/outputs/`.
+*(NORI v1.0.0 baseline. Greedy decoding, single seed, 25-prompt standard set per language. Per-axis scores are in `[0, 1]`, where 1.0 matches the native distribution within tolerance.)*
+
+**Comparing the leaderboards.** Both Qwen models score lower on Nynorsk than on Bokmaal. The 3B model drops 11 points (34.9 to 23.9); the 1.5B drops 4 points (39.7 to 35.5). The 3B model's NN modal-particle rate collapses to 0.15 per 1000 words against a native NN baseline of 2.79 per 1000 words: when prompted in Nynorsk, the model continues to write in Bokmaal-shaped prose with NN orthography sprinkled on top.
+
+To submit a new model to either leaderboard, see [CONTRIBUTING.md](CONTRIBUTING.md). Submissions go under `data/outputs/<model_id>/` for Bokmaal and `data/outputs_nn/<model_id>/` for Nynorsk. Either or both languages may be submitted in the same PR.
 
 ## Why NORI
 

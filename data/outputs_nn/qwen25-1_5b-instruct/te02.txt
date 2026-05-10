@@ -1,0 +1,1 @@
+Forklar på nynorsk korleis ei bankoverføring mellom to norske bankar faktisk fungerer i praksis (BankID, oppgjer, settlement). Mellom 200 og 300 ord.

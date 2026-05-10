@@ -1,0 +1,101 @@
+# NORI-NN standard prompts. Nynorsk versions of the 25 prompts in prompts.yaml.
+# Same structure: 25 prompts × 5 register categories. Each asks for ≥150 words
+# of Norwegian Nynorsk output.
+
+settings:
+  target_min_words: 150
+  target_max_words: 400
+  language: "nn"
+  decode:
+    max_new_tokens: 512
+    do_sample: false
+    temperature: 0.0
+    top_p: 1.0
+    repetition_penalty: 1.0
+
+prompts:
+
+  # ---- Editorial / opinion ----
+  - id: ed01
+    register: editorial
+    text: "Skriv eit kort leiarinnlegg på nynorsk om kvifor offentleg sektor bør vere varsam med å innføre KI-system som ikkje er språkleg kvalitetssikra. Skriv mellom 200 og 300 ord."
+  - id: ed02
+    register: editorial
+    text: "Skriv ein kort kommentar på nynorsk om kvifor papiraviser framleis har ei rolle i 2026, jamvel om dei fleste les nyhende på nett. Mellom 200 og 300 ord."
+  - id: ed03
+    register: editorial
+    text: "Skriv eit debattinnlegg på nynorsk der du argumenterer mot at norske kommunar skal kjøpe ferdige KI-løysingar utan å forstå korleis dei fungerer. Mellom 200 og 300 ord."
+  - id: ed04
+    register: editorial
+    text: "Skriv ein kort kronikk på nynorsk om kvifor born bør lære å skrive for hand, ikkje berre på tastatur. Mellom 200 og 300 ord."
+  - id: ed05
+    register: editorial
+    text: "Skriv ein kort kommentar på nynorsk om kvifor det er viktig at kollektivtrafikken i norske byar er rimeleg, ikkje berre effektiv. Mellom 200 og 300 ord."
+
+  # ---- Personal essay / narrative ----
+  - id: pe01
+    register: personal
+    text: "Skriv ein personleg tekst på nynorsk om eit barndomsminne du har frå ein sumar på fjellet. Bruk ein avslappa, forteljande tone. Mellom 200 og 300 ord."
+  - id: pe02
+    register: personal
+    text: "Skriv ein kort tekst på nynorsk om korleis du opplevde å flytte for første gong. Bruk vanleg kvardagsspråk. Mellom 200 og 300 ord."
+  - id: pe03
+    register: personal
+    text: "Skriv ein personleg tekst på nynorsk om ein samtale du hadde med ein bestefar eller bestemor som du framleis tenkjer på. Mellom 200 og 300 ord."
+  - id: pe04
+    register: personal
+    text: "Skriv ein kort tekst på nynorsk der du skildrar ein tur du har vore på som ikkje gjekk som planlagt. Bruk forteljande tone. Mellom 200 og 300 ord."
+  - id: pe05
+    register: personal
+    text: "Skriv ein personleg tekst på nynorsk om kvifor du likar eller ikkje likar desember månad. Mellom 200 og 300 ord."
+
+  # ---- Technical / explanation ----
+  - id: te01
+    register: technical
+    text: "Forklar på nynorsk, til ein interessert ikkje-spesialist, kva ein stor språkmodell er og korleis han genererer tekst. Mellom 200 og 300 ord."
+  - id: te02
+    register: technical
+    text: "Forklar på nynorsk korleis ei bankoverføring mellom to norske bankar faktisk fungerer i praksis (BankID, oppgjer, settlement). Mellom 200 og 300 ord."
+  - id: te03
+    register: technical
+    text: "Forklar på nynorsk for ein ungdomsskuleelev korleis vaksinar verkar i kroppen. Mellom 200 og 300 ord."
+  - id: te04
+    register: technical
+    text: "Forklar på nynorsk kva forskjellen er mellom utleige og framleige i ein norsk kontekst, og når det eine er lov og det andre ikkje. Mellom 200 og 300 ord."
+  - id: te05
+    register: technical
+    text: "Forklar på nynorsk korleis ein husstand kan rekne ut sitt eige straumforbruk i kroner per månad, gjeve ein spotprisavtale. Mellom 200 og 300 ord."
+
+  # ---- Argumentative / persuasive ----
+  - id: ar01
+    register: argumentative
+    text: "Skriv ein kort argumenterande tekst på nynorsk om kvifor norske bedrifter bør krevje at KI-leverandørar dokumenterer korleis dei handsamar norsk språk. Mellom 200 og 300 ord."
+  - id: ar02
+    register: argumentative
+    text: "Argumenter på nynorsk for at det bør innførast lågare fartsgrense i tettstader. Mellom 200 og 300 ord."
+  - id: ar03
+    register: argumentative
+    text: "Argumenter på nynorsk mot at universiteta bør innføre obligatorisk frammøte i førelesingar. Mellom 200 og 300 ord."
+  - id: ar04
+    register: argumentative
+    text: "Skriv ein kort argumenterande tekst på nynorsk for kvifor barneskular ikkje bør bruke nettbrett for lågare klassetrinn. Mellom 200 og 300 ord."
+  - id: ar05
+    register: argumentative
+    text: "Argumenter på nynorsk for kvifor fleire selskap bør tillate fjernarbeid permanent, ikkje berre som ein korona-arv. Mellom 200 og 300 ord."
+
+  # ---- Letter / formal correspondence ----
+  - id: le01
+    register: letter
+    text: "Skriv eit brev på nynorsk frå ein kunde til eit straumselskap der kunden klagar over ein uventa prisauke og ber om ei konkret forklaring. Mellom 200 og 300 ord."
+  - id: le02
+    register: letter
+    text: "Skriv ein e-post på nynorsk frå ein tilsett til sjefen sin der den tilsette føreslår å innføre fast heimekontordag på fredagar. Mellom 200 og 300 ord."
+  - id: le03
+    register: letter
+    text: "Skriv eit formelt brev på nynorsk frå ei velforeining til kommunen om ein farleg fotgjengarovergang i nabolaget. Mellom 200 og 300 ord."
+  - id: le04
+    register: letter
+    text: "Skriv ein e-post på nynorsk frå ein lærar til foreldra i ein klasse der læraren orienterer om ein komande leirskuletur. Mellom 200 og 300 ord."
+  - id: le05
+    register: letter
+    text: "Skriv eit brev på nynorsk frå ein pasient til fastlegen sin der pasienten ber om ei tilvising og forklarar kvifor. Mellom 200 og 300 ord."

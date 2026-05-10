@@ -36,15 +36,26 @@ REF_DIR = ROOT / "data" / "reference"
 REF_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def acquire_wikipedia(n_articles: int = 1500,
+def acquire_wikipedia(lang: str = "nb",
+                      n_articles: int = 1500,
                       min_chars: int = 1500,
                       max_chars: int = 6000) -> dict:
-    """Stream Norwegian Wikipedia (Bokmål); sample medium-length articles."""
+    """Stream Norwegian Wikipedia and sample medium-length articles.
+
+    lang = "nb" pulls Norwegian Bokmaal Wikipedia (config 20231101.no).
+    lang = "nn" pulls Norwegian Nynorsk Wikipedia (config 20231101.nn).
+    """
+    config_map = {"nb": "20231101.no", "nn": "20231101.nn"}
+    file_suffix = {"nb": "no", "nn": "nn"}
+    if lang not in config_map:
+        raise ValueError(f"Unknown lang code {lang!r}. Use 'nb' or 'nn'.")
+    cfg = config_map[lang]
+    suffix = file_suffix[lang]
+
     from datasets import load_dataset
-    print(f"  streaming wikimedia/wikipedia 20231101.no, sampling up to {n_articles} articles...")
-    ds = load_dataset("wikimedia/wikipedia", "20231101.no",
-                      split="train", streaming=True)
-    out_path = REF_DIR / "wikipedia_no.jsonl"
+    print(f"  streaming wikimedia/wikipedia {cfg}, sampling up to {n_articles} articles...")
+    ds = load_dataset("wikimedia/wikipedia", cfg, split="train", streaming=True)
+    out_path = REF_DIR / f"wikipedia_{suffix}.jsonl"
     n = 0
     seen = 0
     with open(out_path, "w", encoding="utf-8") as f:
@@ -57,17 +68,17 @@ def acquire_wikipedia(n_articles: int = 1500,
                 "id": row.get("id"),
                 "title": row.get("title"),
                 "text": text,
-                "source": "wikipedia_no",
+                "source": f"wikipedia_{suffix}",
             }, ensure_ascii=False) + "\n")
             n += 1
             if n % 200 == 0:
                 print(f"    {n} articles selected (scanned {seen})")
             if n >= n_articles:
                 break
-    print(f"  wikipedia_no: {n} articles in length window {min_chars}-{max_chars}")
+    print(f"  wikipedia_{suffix}: {n} articles in length window {min_chars}-{max_chars}")
     return {
         "license": "CC-BY-SA-4.0",
-        "source": "wikimedia/wikipedia 20231101.no",
+        "source": f"wikimedia/wikipedia {cfg}",
         "config": {"min_chars": min_chars, "max_chars": max_chars,
                    "n_target": n_articles, "n_actual": n},
         "file": str(out_path.relative_to(ROOT)),
@@ -140,15 +151,34 @@ def acquire_gutenberg() -> dict:
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--lang", choices=("nb", "nn", "both"), default="both",
+                    help="Which language to acquire ('nb' Bokmaal, 'nn' Nynorsk, "
+                         "or 'both' for the full NORI v1 reference set).")
+    args = ap.parse_args()
+
     seed_all(42)
-    print("NorskhetsBench reference-corpus acquisition\n")
-    print("[1] Norwegian Wikipedia (modern editorial baseline)")
-    wiki = acquire_wikipedia(n_articles=1500)
-    print()
-    print("[2] Project Gutenberg Norwegian (literary baseline)")
-    gut = acquire_gutenberg()
-    print()
-    manifest = {"wikipedia_no": wiki, "gutenberg_no": gut}
+    print(f"NORI reference-corpus acquisition (lang={args.lang})\n")
+
+    manifest: dict = {}
+
+    langs = ("nb", "nn") if args.lang == "both" else (args.lang,)
+
+    for lang in langs:
+        label = "Bokmaal" if lang == "nb" else "Nynorsk"
+        print(f"[wiki/{lang}] Norwegian {label} Wikipedia")
+        wiki = acquire_wikipedia(lang=lang, n_articles=1500)
+        suffix = "no" if lang == "nb" else "nn"
+        manifest[f"wikipedia_{suffix}"] = wiki
+        print()
+
+    if args.lang in ("nb", "both"):
+        print("[gutenberg] Project Gutenberg Norwegian classics (Bokmaal/literary)")
+        gut = acquire_gutenberg()
+        manifest["gutenberg_no"] = gut
+        print()
+
     with open(REF_DIR / "MANIFEST.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False)
     print(f"Manifest written: {REF_DIR / 'MANIFEST.json'}")

@@ -21,12 +21,12 @@ from metrics import (measure_text, aggregate, score, CorpusMetrics,  # noqa: E40
                      _to_dict)
 
 ROOT = project_root()
-OUT_DIR = ROOT / "data" / "outputs"
 RESULTS = ROOT / "results"
 
 
-def load_baseline() -> CorpusMetrics:
-    with open(RESULTS / "baseline_native.json", encoding="utf-8") as f:
+def load_baseline(lang: str) -> CorpusMetrics:
+    fname = "baseline_native.json" if lang == "nb" else "baseline_native_nn.json"
+    with open(RESULTS / fname, encoding="utf-8") as f:
         rec = json.load(f)
     base = rec["results"]["_combined"]
     cm = CorpusMetrics()
@@ -36,14 +36,14 @@ def load_baseline() -> CorpusMetrics:
     return cm
 
 
-def measure_model(model_dir: Path) -> tuple[CorpusMetrics, list]:
+def measure_model(model_dir: Path, lang: str = "nb") -> tuple[CorpusMetrics, list]:
     metrics = []
     per_prompt = []
     for f in sorted(model_dir.glob("*.txt")):
         text = f.read_text(encoding="utf-8")
         if "[GENERATION ERROR" in text or len(text) < 50:
             continue
-        m = measure_text(text)
+        m = measure_text(text, lang=lang)
         metrics.append(m)
         per_prompt.append({
             "prompt_id": f.stem,
@@ -60,9 +60,20 @@ def measure_model(model_dir: Path) -> tuple[CorpusMetrics, list]:
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--lang", choices=("nb", "nn"), default="nb",
+                    help="Language pack: 'nb' Bokmaal (default), 'nn' Nynorsk.")
+    args = ap.parse_args()
+
+    out_dir = ROOT / "data" / ("outputs" if args.lang == "nb" else "outputs_nn")
+    score_filename_json = "scorecard.json" if args.lang == "nb" else "scorecard_nn.json"
+    score_filename_md = "scorecard.md" if args.lang == "nb" else "scorecard_nn.md"
+    title = "NORI" if args.lang == "nb" else "NORI-NN"
+
     seed_all(42)
-    print("Scoring models against native baseline\n")
-    native = load_baseline()
+    print(f"Scoring models against native {args.lang} baseline\n")
+    native = load_baseline(args.lang)
     print(f"Baseline:")
     print(f"  em-dash/10k chars:  {native.em_dash_per_10k_chars}")
     print(f"  V2 violation rate:  {native.v2_violation_rate}")
@@ -73,9 +84,9 @@ def main():
     print(f"  compound integrity: {native.compound_integrity_rate}")
     print()
 
-    scorecard = {"native_baseline": _to_dict(native), "models": {}}
+    scorecard = {"lang": args.lang, "native_baseline": _to_dict(native), "models": {}}
     md_lines = []
-    md_lines.append("# NORI scorecard\n")
+    md_lines.append(f"# {title} scorecard\n")
     md_lines.append("**NORI score** is the headline number: arithmetic mean of "
                     "the five axes, scaled to [0, 100]. Higher is more native. "
                     "Per-axis scores are in [0, 1] where 1.0 matches the native "
@@ -87,11 +98,11 @@ def main():
                     "levelling | interference |")
     md_lines.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|")
 
-    for model_dir in sorted(OUT_DIR.iterdir()):
+    for model_dir in sorted(out_dir.iterdir()):
         if not model_dir.is_dir():
             continue
         model_id = model_dir.name
-        cm, per_prompt = measure_model(model_dir)
+        cm, per_prompt = measure_model(model_dir, lang=args.lang)
         if cm.n_documents == 0:
             print(f"  {model_id}: no generations found, skipping")
             continue
@@ -127,8 +138,8 @@ def main():
             f"{sc.interference:.3f} |"
         )
 
-    out_json = RESULTS / "scorecard.json"
-    out_md = RESULTS / "scorecard.md"
+    out_json = RESULTS / score_filename_json
+    out_md = RESULTS / score_filename_md
     out_json.write_text(json.dumps(scorecard, indent=2, ensure_ascii=False), encoding="utf-8")
     out_md.write_text("\n".join(md_lines), encoding="utf-8")
     print(f"\n\nScorecard saved: {out_json}")

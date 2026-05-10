@@ -27,7 +27,7 @@ keywords:
   - low-resource-nlp
   - tenki
 license: MIT
-version: "0.1.0"
+version: "1.0.0"
 date-released: 2026-05-10
 preferred-citation:
   type: software
@@ -37,4 +37,4 @@ preferred-citation:
   title: "NORI: A Translation-Universals Benchmark for Norwegian LLMs"
   year: 2026
   url: "https://github.com/tenki-labs/nori"
-  version: "0.1.0"
+  version: "1.0.0"
