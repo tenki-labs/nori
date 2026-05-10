@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+title: "NORI: A Translation-Universals Benchmark for Norwegian LLMs"
+message: "If you use this benchmark in academic work, please cite it as below."
+type: software
+authors:
+  - given-names: Einar
+    family-names: Holt
+    affiliation: tenki
+    orcid: ""
+repository-code: "https://github.com/tenki-labs/nori"
+url: "https://github.com/tenki-labs/nori"
+abstract: >-
+  NORI (NORwegian Idiomatic) is a reproducible benchmark that measures how
+  natively Norwegian an LLM's Norwegian output actually is. It operationalizes
+  the five translation-universals categories from Toury (1995), Baker (1996),
+  and Mauranen and Kujamaki (2004) as concrete measurements: explicitation,
+  normalization, simplification, levelling out, and source-language interference.
+  Each axis is normalized to [0, 1] against a reference distribution computed
+  on 1,500 Norwegian Wikipedia articles plus five Norwegian literary works from
+  Project Gutenberg. The composite NORI score is the mean of the five axes.
+keywords:
+  - norwegian
+  - bokmaal
+  - llm
+  - benchmark
+  - translation-studies
+  - low-resource-nlp
+  - tenki
+license: MIT
+version: "0.1.0"
+date-released: 2026-05-10
+preferred-citation:
+  type: software
+  authors:
+    - given-names: Einar
+      family-names: Holt
+  title: "NORI: A Translation-Universals Benchmark for Norwegian LLMs"
+  year: 2026
+  url: "https://github.com/tenki-labs/nori"
+  version: "0.1.0"

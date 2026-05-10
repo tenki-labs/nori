@@ -1,8 +1,26 @@
 # NORI
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
+[![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](CHANGELOG.md)
+[![Validate submission](https://github.com/tenki-labs/nori/actions/workflows/validate-submission.yml/badge.svg)](https://github.com/tenki-labs/nori/actions/workflows/validate-submission.yml)
+
 **NOR**wegian **I**diomatic. A reproducible benchmark that measures how natively Norwegian an LLM's Norwegian output actually is.
 
 NORI scores generated text against a reference distribution of native Norwegian on five axes drawn from translation studies, the field that has spent thirty years naming the structural signatures of translated text. Standard Norwegian LLM evaluation (NorEval, FLORES-style chrF/BLEU) measures whether the model produces correct words. NORI measures whether the model produces *Norwegian* words in *Norwegian* structure, or whether it produces translatese: grammatically correct Norwegian words arranged in English-shaped sentences.
+
+## Leaderboard
+
+Higher composite score = closer to native Norwegian. Each axis is in `[0, 1]` where `1.0` matches the native distribution within tolerance. See `results/scorecard.json` for raw metrics and per-prompt breakdowns.
+
+| Rank | Model | Composite | Eksplisittering | Normalisering | Forenkling | Utjevning | Interferens |
+|---:|---|---:|---:|---:|---:|---:|---:|
+| 1 | qwen25-1_5b-instruct | **0.397** | 0.661 | 0.263 | 0.050 | 0.250 | 0.760 |
+| 2 | qwen25-3b-instruct | **0.349** | 0.777 | 0.214 | 0.007 | 0.074 | 0.673 |
+
+*(NORI v0.1.0 baseline. Greedy decoding, single seed, 25-prompt standard set.)*
+
+To submit a new model, see [CONTRIBUTING.md](CONTRIBUTING.md). The leaderboard updates automatically on merged PRs that add submissions to `data/outputs/`.
 
 ## Why NORI
 
@@ -23,7 +41,7 @@ Each axis is normalized to `[0, 1]` where `1.0` means the model output matches t
 ## Quick start
 
 ```bash
-git clone https://github.com/byggmesterPRO/nori.git
+git clone https://github.com/tenki-labs/nori.git
 cd nori
 
 # 1. Pull native Norwegian reference corpus (Wikipedia + Project Gutenberg)
@@ -151,7 +169,7 @@ If you use NORI in published work, cite as:
 
 ```
 Holt, E. (2026). NORI: A Translation-Universals Benchmark for Norwegian LLMs.
-tenki research preprint. https://github.com/byggmesterPRO/nori
+tenki research preprint. https://github.com/tenki-labs/nori
 ```
 
 ## License

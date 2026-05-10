@@ -1,0 +1,88 @@
+name: Validate submission
+
+on:
+  pull_request:
+    paths:
+      - 'data/outputs/**'
+      - 'scripts/metrics.py'
+      - 'scripts/30_score.py'
+      - 'configs/prompts.yaml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install spacy>=3.7 sacrebleu>=2.4 numpy>=1.26 scipy>=1.11 pyyaml>=6.0
+          python -m spacy download nb_core_news_md
+
+      - name: Verify submission structure
+        run: |
+          python <<'PY'
+          import os, sys, json, yaml, pathlib
+          repo = pathlib.Path('.')
+          with open(repo / 'configs' / 'prompts.yaml', encoding='utf-8') as f:
+              cfg = yaml.safe_load(f)
+          required_ids = {p['id'] for p in cfg['prompts']}
+          out_dir = repo / 'data' / 'outputs'
+          if not out_dir.exists():
+              sys.exit(0)
+          errors = []
+          for sub in sorted(out_dir.iterdir()):
+              if not sub.is_dir():
+                  continue
+              meta_path = sub / 'meta.json'
+              if not meta_path.exists():
+                  errors.append(f"{sub.name}: missing meta.json")
+              else:
+                  try:
+                      meta = json.loads(meta_path.read_text(encoding='utf-8'))
+                      for required in ('model_id', 'display_name'):
+                          if required not in meta:
+                              errors.append(f"{sub.name}: meta.json missing field '{required}'")
+                  except Exception as e:
+                      errors.append(f"{sub.name}: meta.json invalid JSON ({e})")
+              found = {p.stem for p in sub.glob('*.txt')}
+              missing = required_ids - found
+              extra = found - required_ids
+              if missing:
+                  errors.append(f"{sub.name}: missing prompts {sorted(missing)[:5]}")
+              if extra:
+                  errors.append(f"{sub.name}: unexpected files {sorted(extra)[:5]}")
+          if errors:
+              for e in errors:
+                  print(f"  ERROR: {e}")
+              sys.exit(1)
+          print("All submissions have valid structure.")
+          PY
+
+      - name: Recompute scorecard from submitted outputs
+        run: |
+          if [ -d data/outputs ] && [ -f results/baseline_native.json ]; then
+            PYTHONIOENCODING=utf-8 python -u scripts/30_score.py
+            echo
+            echo "=== scorecard.md ==="
+            cat results/scorecard.md
+          else
+            echo "Skipping recomputation: data/outputs or baseline_native.json missing."
+          fi
+
+      - name: Upload scorecard artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scorecard
+          path: |
+            results/scorecard.json
+            results/scorecard.md
