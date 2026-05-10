@@ -11,16 +11,21 @@ NORI scores generated text against a reference distribution of native Norwegian 
 
 ## Leaderboard
 
-Higher composite score = closer to native Norwegian. Each axis is in `[0, 1]` where `1.0` matches the native distribution within tolerance. See `results/scorecard.json` for raw metrics and per-prompt breakdowns.
+The headline number is **NORI score** (`[0, 100]`, higher is more native Norwegian). It is the arithmetic mean of the five axes scaled to a percentage, analogous to MMLU and GLUE. Two diagnostic aggregates accompany it:
 
-| Rank | Model | Composite | Eksplisittering | Normalisering | Forenkling | Utjevning | Interferens |
-|---:|---|---:|---:|---:|---:|---:|---:|
-| 1 | qwen25-1_5b-instruct | **0.397** | 0.661 | 0.263 | 0.050 | 0.250 | 0.760 |
-| 2 | qwen25-3b-instruct | **0.349** | 0.777 | 0.214 | 0.007 | 0.074 | 0.673 |
+* `nori_min` is the lowest of the five axes × 100. A weakest-link indicator: a model with four strong axes and one near-zero axis still feels translated to a native reader.
+* `nori_g` is the geometric mean × 100. Penalizes weak axes much more than the arithmetic mean and is closer to how a human reader perceives an output: one bad axis pulls the whole impression down.
 
-*(NORI v0.1.0 baseline. Greedy decoding, single seed, 25-prompt standard set.)*
+| Rank | Model | NORI | nori_min | nori_g | Eksplisittering | Normalisering | Forenkling | Utjevning | Interferens |
+|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | qwen25-1_5b-instruct | **39.7** | 5.0 | 27.8 | 0.661 | 0.263 | 0.050 | 0.250 | 0.760 |
+| 2 | qwen25-3b-instruct | **34.9** | 0.7 | 14.2 | 0.777 | 0.214 | 0.007 | 0.074 | 0.673 |
 
-To submit a new model, see [CONTRIBUTING.md](CONTRIBUTING.md). The leaderboard updates automatically on merged PRs that add submissions to `data/outputs/`.
+*(NORI v0.1.0 baseline. Greedy decoding, single seed, 25-prompt standard set. Per-axis scores are in `[0, 1]`, where 1.0 matches the native distribution within tolerance.)*
+
+The two `nori_min` values illustrate why the secondary metric matters: both models score 14 to 35 on the geometric mean and 0.7 to 5.0 on the weakest-link indicator, even though the headline arithmetic mean is in the mid-30s. A native reader who hits the simplification axis (heavy lexical repetition) will perceive that single failure even when other axes are strong.
+
+To submit a new model to the leaderboard, see [CONTRIBUTING.md](CONTRIBUTING.md). The leaderboard updates on merged PRs that add submissions to `data/outputs/`.
 
 ## Why NORI
 
