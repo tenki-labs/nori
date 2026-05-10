@@ -1,4 +1,5 @@
 {
+  "lang": "nb",
   "native_baseline": {
     "n_documents": 1801,
     "total_chars": 8696840,
@@ -19,6 +20,356 @@
     "connectives_per_1k_words": 3.616
   },
   "models": {
+    "gemma-4-e4b-it": {
+      "n_documents_scored": 25,
+      "score": {
+        "explicitation": 0.33262225001769274,
+        "normalization": 0.24983455871512406,
+        "simplification": 0.5534,
+        "levelling_out": 0.41997525314720496,
+        "interference": 0.869,
+        "composite": 0.485,
+        "nori_score": 48.5,
+        "nori_min": 24.98,
+        "nori_g": 44.15,
+        "raw": {
+          "model": {
+            "n_documents": 25,
+            "total_chars": 40468,
+            "total_words": 6429,
+            "total_sentences": 542,
+            "total_main_clauses": 240,
+            "em_dash_per_10k_chars": 0.0,
+            "v2_violation_rate": 0.3417,
+            "compound_integrity_rate": 0.98,
+            "mean_sentence_length": 12.39,
+            "std_sentence_length": 7.84,
+            "p90_sentence_length": 23,
+            "mean_word_length": 4.739,
+            "type_token_ratio": 0.5504,
+            "mttr_1000": 0.5504,
+            "content_word_ratio": 0.5088,
+            "modal_particles_per_1k_words": 8.111,
+            "connectives_per_1k_words": 6.84
+          },
+          "native_ref": {
+            "n_documents": 1801,
+            "total_chars": 8696840,
+            "total_words": 1156419,
+            "total_sentences": 139781,
+            "total_main_clauses": 36871,
+            "em_dash_per_10k_chars": 0.114,
+            "v2_violation_rate": 0.3435,
+            "compound_integrity_rate": 0.9984,
+            "mean_sentence_length": 9.74,
+            "std_sentence_length": 10.76,
+            "p90_sentence_length": 22,
+            "mean_word_length": 5.18,
+            "type_token_ratio": 0.5457,
+            "mttr_1000": 0.555,
+            "content_word_ratio": 0.8594,
+            "modal_particles_per_1k_words": 1.805,
+            "connectives_per_1k_words": 3.616
+          }
+        }
+      },
+      "corpus_metrics": {
+        "n_documents": 25,
+        "total_chars": 40468,
+        "total_words": 6429,
+        "total_sentences": 542,
+        "total_main_clauses": 240,
+        "em_dash_per_10k_chars": 0.0,
+        "v2_violation_rate": 0.3417,
+        "compound_integrity_rate": 0.98,
+        "mean_sentence_length": 12.39,
+        "std_sentence_length": 7.84,
+        "p90_sentence_length": 23,
+        "mean_word_length": 4.739,
+        "type_token_ratio": 0.5504,
+        "mttr_1000": 0.5504,
+        "content_word_ratio": 0.5088,
+        "modal_particles_per_1k_words": 8.111,
+        "connectives_per_1k_words": 6.84
+      },
+      "per_prompt": [
+        {
+          "prompt_id": "ar01",
+          "n_words": 218,
+          "n_sentences": 13,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.5,
+          "mean_sentence_length": 16.77,
+          "modal_particles_per_1k_words": 4.587,
+          "connectives_per_1k_words": 4.587,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "ar02",
+          "n_words": 226,
+          "n_sentences": 17,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.25,
+          "mean_sentence_length": 13.29,
+          "modal_particles_per_1k_words": 13.274,
+          "connectives_per_1k_words": 8.85,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "ar03",
+          "n_words": 304,
+          "n_sentences": 20,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.3333,
+          "mean_sentence_length": 15.2,
+          "modal_particles_per_1k_words": 6.579,
+          "connectives_per_1k_words": 9.868,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "ar04",
+          "n_words": 211,
+          "n_sentences": 16,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.4167,
+          "mean_sentence_length": 13.19,
+          "modal_particles_per_1k_words": 14.218,
+          "connectives_per_1k_words": 4.739,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "ar05",
+          "n_words": 228,
+          "n_sentences": 16,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.2222,
+          "mean_sentence_length": 14.25,
+          "modal_particles_per_1k_words": 4.386,
+          "connectives_per_1k_words": 4.386,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "ed01",
+          "n_words": 261,
+          "n_sentences": 25,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.4545,
+          "mean_sentence_length": 13.74,
+          "modal_particles_per_1k_words": 7.663,
+          "connectives_per_1k_words": 3.831,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "ed02",
+          "n_words": 245,
+          "n_sentences": 19,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.2857,
+          "mean_sentence_length": 12.89,
+          "modal_particles_per_1k_words": 12.245,
+          "connectives_per_1k_words": 4.082,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "ed03",
+          "n_words": 239,
+          "n_sentences": 15,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.3333,
+          "mean_sentence_length": 15.93,
+          "modal_particles_per_1k_words": 4.184,
+          "connectives_per_1k_words": 8.368,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "ed04",
+          "n_words": 274,
+          "n_sentences": 19,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.4444,
+          "mean_sentence_length": 14.42,
+          "modal_particles_per_1k_words": 3.65,
+          "connectives_per_1k_words": 3.65,
+          "compound_integrity_rate": 0.5
+        },
+        {
+          "prompt_id": "ed05",
+          "n_words": 260,
+          "n_sentences": 16,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.1667,
+          "mean_sentence_length": 16.25,
+          "modal_particles_per_1k_words": 26.923,
+          "connectives_per_1k_words": 3.846,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "le01",
+          "n_words": 269,
+          "n_sentences": 42,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.4286,
+          "mean_sentence_length": 7.69,
+          "modal_particles_per_1k_words": 0.0,
+          "connectives_per_1k_words": 0.0,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "le02",
+          "n_words": 327,
+          "n_sentences": 22,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.6875,
+          "mean_sentence_length": 15.57,
+          "modal_particles_per_1k_words": 6.116,
+          "connectives_per_1k_words": 6.116,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "le03",
+          "n_words": 260,
+          "n_sentences": 31,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.3333,
+          "mean_sentence_length": 9.29,
+          "modal_particles_per_1k_words": 3.846,
+          "connectives_per_1k_words": 7.692,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "le04",
+          "n_words": 244,
+          "n_sentences": 16,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.5,
+          "mean_sentence_length": 15.25,
+          "modal_particles_per_1k_words": 0.0,
+          "connectives_per_1k_words": 0.0,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "le05",
+          "n_words": 271,
+          "n_sentences": 43,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.4545,
+          "mean_sentence_length": 7.32,
+          "modal_particles_per_1k_words": 3.69,
+          "connectives_per_1k_words": 7.38,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "pe01",
+          "n_words": 232,
+          "n_sentences": 17,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.1,
+          "mean_sentence_length": 13.65,
+          "modal_particles_per_1k_words": 4.31,
+          "connectives_per_1k_words": 0.0,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "pe02",
+          "n_words": 317,
+          "n_sentences": 26,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.2,
+          "mean_sentence_length": 12.19,
+          "modal_particles_per_1k_words": 9.464,
+          "connectives_per_1k_words": 3.155,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "pe03",
+          "n_words": 258,
+          "n_sentences": 17,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.0,
+          "mean_sentence_length": 15.18,
+          "modal_particles_per_1k_words": 15.504,
+          "connectives_per_1k_words": 7.752,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "pe04",
+          "n_words": 252,
+          "n_sentences": 21,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.0625,
+          "mean_sentence_length": 12,
+          "modal_particles_per_1k_words": 11.905,
+          "connectives_per_1k_words": 7.937,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "pe05",
+          "n_words": 246,
+          "n_sentences": 17,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.125,
+          "mean_sentence_length": 14.47,
+          "modal_particles_per_1k_words": 4.065,
+          "connectives_per_1k_words": 12.195,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "te01",
+          "n_words": 323,
+          "n_sentences": 24,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.4,
+          "mean_sentence_length": 13.46,
+          "modal_particles_per_1k_words": 6.192,
+          "connectives_per_1k_words": 12.384,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "te02",
+          "n_words": 218,
+          "n_sentences": 16,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.2,
+          "mean_sentence_length": 13.62,
+          "modal_particles_per_1k_words": 4.587,
+          "connectives_per_1k_words": 9.174,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "te03",
+          "n_words": 250,
+          "n_sentences": 43,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.1667,
+          "mean_sentence_length": 5.81,
+          "modal_particles_per_1k_words": 16.0,
+          "connectives_per_1k_words": 8.0,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "te04",
+          "n_words": 266,
+          "n_sentences": 15,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.4,
+          "mean_sentence_length": 17.73,
+          "modal_particles_per_1k_words": 15.038,
+          "connectives_per_1k_words": 11.278,
+          "compound_integrity_rate": 1.0
+        },
+        {
+          "prompt_id": "te05",
+          "n_words": 230,
+          "n_sentences": 16,
+          "em_dash_per_10k_chars": 0.0,
+          "v2_violation_rate": 0.7692,
+          "mean_sentence_length": 14.38,
+          "modal_particles_per_1k_words": 4.348,
+          "connectives_per_1k_words": 21.739,
+          "compound_integrity_rate": 1.0
+        }
+      ]
+    },
     "qwen25-1_5b-instruct": {
       "n_documents_scored": 25,
       "score": {

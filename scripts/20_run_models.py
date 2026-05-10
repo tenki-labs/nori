@@ -24,6 +24,7 @@ ROOT = project_root()
 MODELS = [
     {"id": "qwen25-3b-instruct", "hf": "Qwen/Qwen2.5-3B-Instruct", "qlora": True},
     {"id": "qwen25-1_5b-instruct", "hf": "Qwen/Qwen2.5-1.5B-Instruct", "qlora": True},
+    {"id": "gemma-4-e4b-it",      "hf": "google/gemma-4-e4b-it",     "qlora": True},
 ]
 
 

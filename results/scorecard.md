@@ -6,5 +6,6 @@
 
 | Model | NORI score | nori_min | nori_g | explicitation | normalization | simplification | levelling | interference |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
+| gemma-4-e4b-it | **48.5** | 25.0 | 44.1 | 0.333 | 0.250 | 0.553 | 0.420 | 0.869 |
 | qwen25-1_5b-instruct | **39.7** | 5.0 | 27.8 | 0.661 | 0.263 | 0.050 | 0.250 | 0.760 |
 | qwen25-3b-instruct | **34.9** | 0.7 | 14.2 | 0.777 | 0.214 | 0.007 | 0.074 | 0.673 |

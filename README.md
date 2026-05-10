@@ -22,8 +22,9 @@ The headline number on each is the **NORI score** (`[0, 100]`, higher is more na
 
 | Rank | Model | NORI | nori_min | nori_g | Eksplisittering | Normalisering | Forenkling | Utjevning | Interferens |
 |---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1 | qwen25-1_5b-instruct | **39.7** | 5.0 | 27.8 | 0.661 | 0.263 | 0.050 | 0.250 | 0.760 |
-| 2 | qwen25-3b-instruct | **34.9** | 0.7 | 14.2 | 0.777 | 0.214 | 0.007 | 0.074 | 0.673 |
+| 1 | gemma-4-e4b-it | **48.5** | 25.0 | 44.1 | 0.333 | 0.250 | 0.553 | 0.420 | 0.869 |
+| 2 | qwen25-1_5b-instruct | **39.7** | 5.0 | 27.8 | 0.661 | 0.263 | 0.050 | 0.250 | 0.760 |
+| 3 | qwen25-3b-instruct | **34.9** | 0.7 | 14.2 | 0.777 | 0.214 | 0.007 | 0.074 | 0.673 |
 
 ### NORI-NN (Nynorsk)
 
@@ -31,10 +32,16 @@ The headline number on each is the **NORI score** (`[0, 100]`, higher is more na
 |---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
 | 1 | qwen25-1_5b-instruct | **35.5** | 0.9 | 19.3 | 0.486 | 0.371 | 0.009 | 0.258 | 0.653 |
 | 2 | qwen25-3b-instruct | **23.9** | 0.1 | 4.4 | 0.375 | 0.004 | 0.001 | 0.104 | 0.709 |
+| — | gemma-4-e4b-it | *pending* | — | — | — | — | — | — | — |
 
-*(NORI v1.0.0 baseline. Greedy decoding, single seed, 25-prompt standard set per language. Per-axis scores are in `[0, 1]`, where 1.0 matches the native distribution within tolerance.)*
+*(NORI v1.0.0 baseline. Greedy decoding, single seed, 25-prompt standard set per language. Per-axis scores are in `[0, 1]`, where 1.0 matches the native distribution within tolerance. Gemma 4 E4B NORI-NN run is queued; ~25 minutes of GPU time pending on a consumer 5070 Ti.)*
 
-**Comparing the leaderboards.** Both Qwen models score lower on Nynorsk than on Bokmaal. The 3B model drops 11 points (34.9 to 23.9); the 1.5B drops 4 points (39.7 to 35.5). The 3B model's NN modal-particle rate collapses to 0.15 per 1000 words against a native NN baseline of 2.79 per 1000 words: when prompted in Nynorsk, the model continues to write in Bokmaal-shaped prose with NN orthography sprinkled on top.
+**Notable observations from the v1.0.0 leaderboard.**
+
+- **Gemma 4 E4B opens a substantial lead on Bokmaal** (48.5 vs Qwen 39.7). The gap is concentrated on the **forenkling** axis: Gemma's MTTR-1000 of 0.55 essentially matches the native baseline (also 0.55), while Qwen models sit at 0.18 to 0.28. Gemma is not repetitive in the way Qwen is at this scale.
+- Gemma's modal-particle density (8.11 per 1000 words) actually *exceeds* native (1.81 per 1000 words). It overcorrects toward "feels Norwegian" by sprinkling "jo, da, vel" more aggressively than native writers.
+- Gemma's connective density (6.84 per 1000 words) is also above native (3.62), pushing the eksplisittering axis down to 0.333. The model spells out logic more than native writers do, a classic translatese marker.
+- Both Qwen models score lower on Nynorsk than on Bokmaal. The 3B drops 11 points (34.9 to 23.9); the 1.5B drops 4 points (39.7 to 35.5). The 3B model's NN modal-particle rate collapses to 0.15 per 1000 words against a native NN baseline of 2.79 per 1000 words: when prompted in Nynorsk, the model continues to write in Bokmaal-shaped prose with NN orthography sprinkled on top.
 
 To submit a new model to either leaderboard, see [CONTRIBUTING.md](CONTRIBUTING.md). Submissions go under `data/outputs/<model_id>/` for Bokmaal and `data/outputs_nn/<model_id>/` for Nynorsk. Either or both languages may be submitted in the same PR.
 
