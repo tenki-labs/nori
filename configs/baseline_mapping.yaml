@@ -1,0 +1,26 @@
+# NORI v2 issue #5: per-register baseline mapping.
+#
+# Maps prompt-id prefix -> baseline source key in baseline_native{,_nn}.json.
+# When passed to 30_score.py via --baseline-mapping, each model output is
+# scored against the most-appropriate native register instead of the combined
+# (wiki + gutenberg) distribution.
+#
+# Available baseline keys (see results/baseline_native.json):
+#   wikipedia_no   modern encyclopedic Bokmål, short sentences, neutral register
+#   gutenberg_no   classical Norwegian literature 1880-1910, longer sentences
+#   wikipedia_nn   modern encyclopedic Nynorsk
+#   _combined      mean of all available sources (NORI v1.x default)
+
+bokmaal:
+  ed: wikipedia_no       # editorial / opinion -> encyclopedic baseline
+  te: wikipedia_no       # technical explanation -> encyclopedic
+  ar: wikipedia_no       # argumentative / persuasive -> encyclopedic
+  le: _combined          # letter / formal correspondence -> mixed
+  pe: gutenberg_no       # personal essay / narrative -> literary
+
+nynorsk:
+  ed: wikipedia_nn
+  te: wikipedia_nn
+  ar: wikipedia_nn
+  le: wikipedia_nn       # no gutenberg_nn available
+  pe: wikipedia_nn

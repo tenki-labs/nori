@@ -27,6 +27,10 @@ jobs:
           pip install spacy>=3.7 sacrebleu>=2.4 numpy>=1.26 scipy>=1.11 pyyaml>=6.0
           python -m spacy download nb_core_news_md
 
+      - name: Run unit tests
+        run: |
+          PYTHONIOENCODING=utf-8 python -u tests/run_tests.py
+
       - name: Verify submission structure
         run: |
           python <<'PY'

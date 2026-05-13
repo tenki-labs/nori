@@ -36,5 +36,11 @@ logs/
 .env
 .venv/
 
+# pip install artifacts that land in-tree when running pip without a venv
+Lib/
+Scripts/
+scripts/pytest.exe
+scripts/py.test.exe
+
 # Optional paper/whitepaper directory (not part of the benchmark itself)
 paper/

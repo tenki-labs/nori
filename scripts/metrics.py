@@ -166,7 +166,8 @@ class TextMetrics:
     type_count: int = 0
     token_count: int = 0
     type_token_ratio: float = 0.0    # TTR over all tokens
-    mttr_1000: float = 0.0           # Moving TTR with window 1000
+    mttr_100: float = 0.0            # Moving TTR with window 100 (NORI v2 primary)
+    mttr_1000: float = 0.0           # Moving TTR with window 1000 (deprecated, kept for diagnostics)
     mean_word_length: float = 0.0
     content_word_ratio: float = 0.0   # content tokens / total tokens
 
@@ -205,17 +206,58 @@ def _is_main_clause_root(token) -> bool:
     return True
 
 
+def _is_declarative_candidate(sent) -> bool:
+    """Whether a sentence span is a declarative main clause that V2 applies to.
+
+    Returns False for interrogatives (V1 yes/no questions, wh-questions),
+    imperatives, exclamations, and fragments. V2 in Norwegian governs
+    *declarative* main clauses; flagging non-declaratives as "violations"
+    over-counts and pollutes the interferens axis (issue #1).
+    """
+    text = sent.text.strip()
+    if not text:
+        return False
+    # Interrogatives and imperatives/exclamations
+    if text.endswith("?") or text.endswith("!"):
+        return False
+    # Fragments by length
+    alpha_tokens = [t for t in sent if t.is_alpha]
+    if len(alpha_tokens) < 3:
+        return False
+    # Fragments with non-verbal heads. A declarative requires a verbal predicate;
+    # if the root is a bare noun/adjective/interjection, treat as fragment.
+    root = None
+    for tok in sent:
+        if tok.dep_ == "ROOT":
+            root = tok
+            break
+    if root is None:
+        return False
+    if root.dep_ in ("discourse", "vocative"):
+        return False
+    if root.pos_ in ("INTJ", "PUNCT", "SYM", "X"):
+        return False
+    return True
+
+
 def _check_v2(sent) -> tuple[bool, bool]:
     """For a sentence span, return (is_main_clause, v2_satisfied).
 
-    Norwegian V2 says the finite verb is in position 2 of a main clause where
-    'position' counts constituents (XP), not tokens. Here we approximate:
-    position-2 = the verb is the second top-level constituent, where the first
-    can be a subject NP, an adverbial PP/NP, an object, or a clause.
+    Norwegian V2 says the finite verb is in position 2 of a *declarative* main
+    clause where 'position' counts constituents (XP), not tokens. Here we
+    approximate: position-2 = the verb is the second top-level constituent,
+    where the first can be a subject NP, an adverbial PP/NP, an object, or
+    a clause.
 
-    We use a robust heuristic: find the main-clause finite verb, count how many
-    distinct top-level dependents come before it. Exactly one ⇒ V2 satisfied.
+    Non-declaratives (questions, imperatives, fragments) are excluded from the
+    main-clause count entirely. V2 is a declarative-clause property; counting
+    a V1 yes/no question as a "violation" over-counts the rate and the
+    interferens axis rewards models for producing only formal declarative
+    prose (issue #1).
     """
+    if not _is_declarative_candidate(sent):
+        return False, True
+
     # Find the main verb (root of this sentence)
     root = None
     for tok in sent:
@@ -253,34 +295,76 @@ def _check_v2(sent) -> tuple[bool, bool]:
     return True, v2
 
 
+_COMPOUND_FALLBACK_PREFIXES = frozenset({
+    "stor", "lille", "ny", "gammel", "lite", "stort",
+    "bil", "buss", "tog", "fly", "båt", "ferje",
+    "hus", "mat", "kaffe", "te", "skole", "barnehage",
+    "data", "tekst", "tall", "språk", "lyd", "bilde",
+    "barn", "barne", "ungdom", "voksen", "elev", "lærer",
+    "natt", "dag", "morgen", "kveld", "uke", "år",
+    "topp", "bunn", "side", "fram", "tilbake",
+    "kontor", "møte", "konferanse", "tjeneste",
+    "arbeid", "arbeids", "yrkes", "fag",
+    "salgs", "kjøps", "rente", "låne", "skatte",
+    "trafikk", "vei", "jernbane", "fly", "havne",
+    "by", "kommune", "fylkes", "stats", "regjerings",
+    "helse", "sykehus", "lege", "tann", "psykiater",
+    "data", "internett", "nett", "tele", "mobil",
+})
+
+
+def _looks_like_compound_in_vocab(nlp, w1: str, w2: str) -> bool:
+    """Dictionary-backed check: does `w1+w2` exist as a known single Norwegian
+    word? Uses the spaCy nb_core_news_md vocabulary, which contains ~50k
+    word vectors for tokens seen during training. If the concatenation has a
+    vector, it was attested as a single word and we have evidence the bigram
+    is a wrongly-split compound (issue #6).
+    """
+    combined = (w1 + w2).lower()
+    if len(combined) < 6:
+        return False
+    try:
+        lex = nlp.vocab[combined]
+        if lex.has_vector and lex.vector_norm > 0:
+            return True
+        # Some compounds may be in the vocab without vectors. Treat any non-OOV
+        # entry as a positive signal too.
+        if not lex.is_oov:
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def _detect_compound_separation(doc) -> tuple[int, int]:
     """Detect potential särskrivning: cases where a noun-noun bigram is
     suspicious of being a compound-word that was wrongly split.
 
-    Heuristic (high precision, low recall): adjacent NOUN+NOUN tokens where
-    the first is short (≤ 6 chars) and a known compound-prefix-likely word
-    AND there's no preposition/adjective between them. This is a lower bound
-    only:doesn't catch all cases but flags the most egregious.
+    NORI v2 (issue #6): dictionary-backed lookup using the spaCy
+    nb_core_news_md vocabulary. For each NOUN+NOUN bigram (W1, W2), check
+    whether the concatenation W1+W2 is a known Norwegian word in the spaCy
+    vocab. If yes, the bigram is flagged as a likely särskriving. Falls back
+    to a curated prefix list for vocab-miss cases.
+
+    This catches a much broader class of compound splits than the 30-prefix
+    heuristic used in v1.x, which detected an estimated 5 to 10% of splits.
     """
-    candidate_prefixes = {
-        "stor", "lille", "ny", "gammel",
-        "bil", "buss", "tog", "fly",
-        "hus", "mat", "kaffe", "te", "skole",
-        "data", "tekst", "tall", "språk",
-        "barn", "barne", "ungdom", "voksen",
-        "natt", "dag", "morgen", "kveld",
-        "topp", "bunn", "side",
-        "kontor", "møte", "konferanse", "tjeneste",
-    }
     candidates = 0
     suspected = 0
+    nlp = _get_nlp()
     for i in range(len(doc) - 1):
         a, b = doc[i], doc[i + 1]
         if (a.pos_ in ("NOUN", "PROPN") and b.pos_ in ("NOUN", "PROPN")
                 and a.text.isalpha() and b.text.isalpha()):
             candidates += 1
-            # Heuristic: if either word is in candidate_prefixes, flag it
-            if a.text.lower() in candidate_prefixes:
+            w1, w2 = a.text.lower(), b.text.lower()
+            # Primary: dictionary lookup against spaCy vocab.
+            if _looks_like_compound_in_vocab(nlp, w1, w2):
+                suspected += 1
+                continue
+            # Fallback: curated prefix list (preserves v1.x behavior for
+            # cases the vocab lookup misses).
+            if w1 in _COMPOUND_FALLBACK_PREFIXES:
                 suspected += 1
     return candidates, suspected
 
@@ -360,7 +444,20 @@ def measure_text(text: str, lang: str = "nb") -> TextMetrics:
     m.token_count = len(word_lower)
     m.type_token_ratio = round(m.type_count / m.token_count, 4) if m.token_count else 0.0
 
-    # Moving TTR with window 1000 (averaged over windows)
+    # Moving TTR with window 100 (NORI v2 primary, stable on 200 to 400 word
+    # LLM outputs; Covington and McFall 2010). Issue #2: MTTR-1000 fell back to
+    # plain TTR on short documents and conflated diversity with length.
+    if m.token_count >= 100:
+        ttrs = []
+        for start in range(0, m.token_count - 99, 50):
+            window = word_lower[start:start + 100]
+            ttrs.append(len(set(window)) / 100)
+        m.mttr_100 = round(sum(ttrs) / len(ttrs), 4)
+    else:
+        m.mttr_100 = m.type_token_ratio
+
+    # Moving TTR with window 1000 (legacy v1.x metric, kept for backward
+    # compatibility and diagnostic comparison; not used by score() in v2+).
     if m.token_count >= 1000:
         ttrs = []
         for start in range(0, m.token_count - 999, 500):
@@ -427,7 +524,8 @@ class CorpusMetrics:
     p90_sentence_length: float = 0.0
     mean_word_length: float = 0.0
     type_token_ratio: float = 0.0
-    mttr_1000: float = 0.0
+    mttr_100: float = 0.0   # NORI v2 primary
+    mttr_1000: float = 0.0  # deprecated, kept for backward comparison
     content_word_ratio: float = 0.0
     modal_particles_per_1k_words: float = 0.0
     connectives_per_1k_words: float = 0.0
@@ -457,6 +555,7 @@ def aggregate(metrics: list[TextMetrics]) -> CorpusMetrics:
     word_len_sum = 0.0
     word_len_n = 0
     type_token_pairs = []
+    mttr100_pairs = []
     mttr_pairs = []
     content_pairs = []
     mp_pairs = []
@@ -478,6 +577,7 @@ def aggregate(metrics: list[TextMetrics]) -> CorpusMetrics:
             word_len_n += c
         if m.token_count:
             type_token_pairs.append((m.type_count, m.token_count))
+            mttr100_pairs.append(m.mttr_100)
             mttr_pairs.append(m.mttr_1000)
             content_pairs.append(m.content_word_ratio)
             mp_pairs.append(m.modal_particles_per_1k_words)
@@ -507,6 +607,8 @@ def aggregate(metrics: list[TextMetrics]) -> CorpusMetrics:
         # Pooled TTR (sum of unique types / sum of tokens) is biased by length;
         # we report the mean of per-document TTRs instead, alongside MTTR-1000.
         cm.type_token_ratio = round(sum(t / n for t, n in type_token_pairs) / len(type_token_pairs), 4)
+    if mttr100_pairs:
+        cm.mttr_100 = round(sum(mttr100_pairs) / len(mttr100_pairs), 4)
     if mttr_pairs:
         cm.mttr_1000 = round(sum(mttr_pairs) / len(mttr_pairs), 4)
     if content_pairs:
@@ -594,9 +696,11 @@ def score(model_metrics: CorpusMetrics, native_ref: CorpusMetrics) -> NoriScore:
         tolerance=3.0,
     )
 
-    # Forenkling: MTTR-1000 and mean word length
+    # Forenkling: MTTR-100 (NORI v2) and mean word length. Issue #2: MTTR-1000
+    # fell back to plain TTR on short documents; MTTR-100 is well-defined on
+    # 200 to 400 word outputs and decouples diversity from length.
     mttr_score = _smooth_score(
-        model_metrics.mttr_1000, native_ref.mttr_1000, tolerance=0.05)
+        model_metrics.mttr_100, native_ref.mttr_100, tolerance=0.08)
     wl_score = _smooth_score(
         model_metrics.mean_word_length, native_ref.mean_word_length, tolerance=0.4)
     s.simplification = round((mttr_score + wl_score) / 2, 4)

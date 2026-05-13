@@ -1,43 +1,20 @@
 {
-  "experiment_id": "baseline_native",
-  "timestamp_utc": "2026-05-09T21:35:39.054516+00:00",
-  "config": {
-    "max_chars_per_doc": 12000,
-    "min_chunk": 500,
-    "seed": 42
-  },
-  "input_hashes": {
-    "D:\\Einar\\Programmering2026\\tenki-ting\\forskning\\zero-knowledge-llm\\norwegianness-bench\\data\\reference\\wikipedia_no.jsonl": "b11731c06e3a7d63d629411ebc78229629c2da55be0fda4e3494c35e8a3cdb88",
-    "D:\\Einar\\Programmering2026\\tenki-ting\\forskning\\zero-knowledge-llm\\norwegianness-bench\\data\\reference\\gutenberg_no.jsonl": "0a0b6fc336683b99b0fde776ee44472155095de2b97a00965fb46d427e9815d5"
-  },
-  "env": {
-    "python": "3.13.7",
-    "platform": "Windows-11-10.0.26200-SP0",
-    "hostname": "nemesis",
-    "libraries": {
-      "spacy": "3.8.14",
-      "scipy": "1.17.1",
-      "numpy": "2.4.4",
-      "transformers": "5.7.0",
-      "torch": "2.11.0+cu128",
-      "sacrebleu": "2.6.0"
-    }
-  },
   "results": {
     "wikipedia_no": {
       "n_documents": 1500,
       "total_chars": 5200992,
       "total_words": 669566,
       "total_sentences": 62998,
-      "total_main_clauses": 27536,
+      "total_main_clauses": 26283,
       "em_dash_per_10k_chars": 0.19,
-      "v2_violation_rate": 0.3111,
-      "compound_integrity_rate": 0.9977,
+      "v2_violation_rate": 0.2839,
+      "compound_integrity_rate": 0.9919,
       "mean_sentence_length": 11.15,
       "std_sentence_length": 10.49,
       "p90_sentence_length": 23,
       "mean_word_length": 5.714,
       "type_token_ratio": 0.5953,
+      "mttr_100": 0.7422,
       "mttr_1000": 0.5953,
       "content_word_ratio": 0.7266,
       "modal_particles_per_1k_words": 2.167,
@@ -48,15 +25,16 @@
       "total_chars": 3495848,
       "total_words": 486853,
       "total_sentences": 76783,
-      "total_main_clauses": 9335,
+      "total_main_clauses": 6981,
       "em_dash_per_10k_chars": 0.0,
-      "v2_violation_rate": 0.439,
-      "compound_integrity_rate": 0.9999,
+      "v2_violation_rate": 0.3474,
+      "compound_integrity_rate": 0.9942,
       "mean_sentence_length": 8.3,
       "std_sentence_length": 10.84,
       "p90_sentence_length": 21,
       "mean_word_length": 4.445,
       "type_token_ratio": 0.2983,
+      "mttr_100": 0.6085,
       "mttr_1000": 0.3541,
       "content_word_ratio": 1.5211,
       "modal_particles_per_1k_words": 0.004,
@@ -67,15 +45,16 @@
       "total_chars": 8696840,
       "total_words": 1156419,
       "total_sentences": 139781,
-      "total_main_clauses": 36871,
+      "total_main_clauses": 33264,
       "em_dash_per_10k_chars": 0.114,
-      "v2_violation_rate": 0.3435,
-      "compound_integrity_rate": 0.9984,
+      "v2_violation_rate": 0.2973,
+      "compound_integrity_rate": 0.9926,
       "mean_sentence_length": 9.74,
       "std_sentence_length": 10.76,
       "p90_sentence_length": 22,
       "mean_word_length": 5.18,
       "type_token_ratio": 0.5457,
+      "mttr_100": 0.7199,
       "mttr_1000": 0.555,
       "content_word_ratio": 0.8594,
       "modal_particles_per_1k_words": 1.805,
@@ -5083,5 +5062,8 @@
         5
       ]
     }
+  },
+  "config": {
+    "lang": "nb"
   }
 }

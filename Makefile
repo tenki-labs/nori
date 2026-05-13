@@ -15,6 +15,7 @@ S := scripts
         baseline baseline-nb baseline-nn \
         generate generate-nb generate-nn \
         score score-nb score-nn \
+        test \
         clean help
 
 help:
@@ -37,6 +38,8 @@ help:
 	@echo "  make score          score both NORI and NORI-NN"
 	@echo "  make score-nb       NORI (Bokmaal) only"
 	@echo "  make score-nn       NORI-NN (Nynorsk) only"
+	@echo ""
+	@echo "  make test           run unit tests for the metric library"
 	@echo ""
 	@echo "  make clean          remove generated outputs (keeps reference data)"
 
@@ -74,6 +77,9 @@ generate-nn:
 
 score-nn:
 	$(ENV) $(PYTHON) -u $(S)/30_score.py --lang nn
+
+test:
+	$(ENV) $(PYTHON) -u tests/run_tests.py
 
 clean:
 	rm -rf data/outputs data/outputs_nn \

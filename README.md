@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
-[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.0.0-green.svg)](CHANGELOG.md)
 [![Validate submission](https://github.com/tenki-labs/nori/actions/workflows/validate-submission.yml/badge.svg)](https://github.com/tenki-labs/nori/actions/workflows/validate-submission.yml)
 
 **NOR**wegian **I**diomatic. A reproducible benchmark that measures how natively Norwegian an LLM's Norwegian output actually is.
@@ -22,27 +22,28 @@ The headline number on each is the **NORI score** (`[0, 100]`, higher is more na
 
 | Rank | Model | NORI | nori_min | nori_g | Eksplisittering | Normalisering | Forenkling | Utjevning | Interferens |
 |---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1 | gemma-4-e4b-it | **48.5** | 25.0 | 44.1 | 0.333 | 0.250 | 0.553 | 0.420 | 0.869 |
-| 2 | qwen25-1_5b-instruct | **39.7** | 5.0 | 27.8 | 0.661 | 0.263 | 0.050 | 0.250 | 0.760 |
-| 3 | qwen25-3b-instruct | **34.9** | 0.7 | 14.2 | 0.777 | 0.214 | 0.007 | 0.074 | 0.673 |
+| 1 | gemma-4-e4b-it | **46.3** | 25.0 | 42.3 | 0.333 | 0.250 | 0.457 | 0.420 | 0.854 |
+| 2 | qwen25-1_5b-instruct | **37.1** | 5.0 | 26.7 | 0.661 | 0.263 | 0.050 | 0.250 | 0.630 |
+| 3 | qwen25-3b-instruct | **29.3** | 0.7 | 12.8 | 0.777 | 0.214 | 0.007 | 0.074 | 0.390 |
 
 ### NORI-NN (Nynorsk)
 
 | Rank | Model | NORI-NN | nori_min | nori_g | Eksplisittering | Normalisering | Forenkling | Utjevning | Interferens |
 |---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1 | gemma-4-e4b-it | **47.9** | 15.5 | 37.4 | 0.419 | 0.845 | 0.155 | 0.163 | 0.814 |
-| 2 | qwen25-1_5b-instruct | **35.5** | 0.9 | 19.2 | 0.486 | 0.371 | 0.009 | 0.258 | 0.653 |
-| 3 | qwen25-3b-instruct | **23.9** | 0.1 | 4.4 | 0.375 | 0.004 | 0.001 | 0.104 | 0.709 |
+| 1 | gemma-4-e4b-it | **48.0** | 16.3 | 40.5 | 0.419 | 0.845 | 0.271 | 0.163 | 0.700 |
+| 2 | qwen25-1_5b-instruct | **34.2** | 0.9 | 18.8 | 0.486 | 0.371 | 0.009 | 0.258 | 0.586 |
+| 3 | qwen25-3b-instruct | **22.2** | 0.1 | 4.3 | 0.375 | 0.004 | 0.001 | 0.104 | 0.625 |
 
-*(NORI v1.0.0 baseline. Greedy decoding, single seed, 25-prompt standard set per language. Per-axis scores are in `[0, 1]`, where 1.0 matches the native distribution within tolerance.)*
+*(NORI v2.0.0 baseline. Greedy decoding, single seed, 25-prompt standard set per language. Per-axis scores are in `[0, 1]`, where 1.0 matches the native distribution within tolerance. **Not comparable to v1.x scores**: the forenkling axis switched from MTTR-1000 to MTTR-100, the V2 measurement filters out non-declaratives, and the compound detector uses a dictionary lookup instead of a 30-prefix list. See [CHANGELOG.md](CHANGELOG.md) for migration notes.)*
 
-**Notable observations from the v1.0.0 leaderboard.**
+**Notable observations from the v2.0.0 leaderboard.**
 
-- **Gemma 4 E4B opens a substantial lead on both languages** (NORI 48.5, NORI-NN 47.9 vs Qwen at 35-40 / 24-36). The gap is concentrated on the **forenkling** axis (NB): Gemma's MTTR-1000 of 0.55 matches the Bokmaal native baseline (also 0.55), while Qwen models sit at 0.18 to 0.28. Gemma is not repetitive in the way Qwen is at this scale.
-- **Gemma is uniquely consistent across the two written standards.** It drops only 0.6 points between Bokmaal (48.5) and Nynorsk (47.9). Qwen 3B drops 11 points (34.9 to 23.9); Qwen 1.5B drops 4 points (39.7 to 35.5). Gemma's NN normalisering axis is 0.85, the highest single-axis score in the entire leaderboard, indicating its NN sentence-length distribution closely matches native Wikipedia NN.
-- Gemma's modal-particle density actually *exceeds* native on both languages (NB: 8.11 vs 1.81 per 1000 words; NN: 8.39 vs 2.79). It overcorrects toward "feels Norwegian" by sprinkling "jo, da, vel" more aggressively than native writers do.
-- Gemma's connective density is also above native on both languages (NB: 6.84 vs 3.62; NN: 5.93 vs 3.27), pushing the eksplisittering axis to mid-0.4 range. The model spells out logic more than native writers do, a classic translatese marker.
-- Both Qwen models collapse on the Bokmaal-to-Nynorsk transition. Qwen 3B's NN modal-particle rate falls to 0.15 per 1000 words against a native NN baseline of 2.79 per 1000 words: when prompted in Nynorsk, the model continues to write in Bokmaal-shaped prose with NN orthography sprinkled on top.
+- **Gemma 4 E4B leads both languages** (NORI 46.3, NORI-NN 48.0 vs Qwen at 22 to 37). The gap is concentrated on the **forenkling** axis: Gemma's MTTR-100 of 0.70 (NB) is close to the native baseline of 0.72; Qwen 1.5B and 3B drop to 0.26 and 0.40. Qwen models cycle through a narrow vocabulary in a way Gemma does not.
+- **Gemma is uniquely consistent across the two written standards.** It actually scores slightly *higher* on Nynorsk than Bokmaal under v2 scoring (48.0 vs 46.3), driven by an impressive normalisering of 0.85 on NN (highest single-axis score in the leaderboard). Qwen 3B drops 7 points NB to NN (29.3 to 22.2); Qwen 1.5B drops 3 points (37.1 to 34.2).
+- Gemma's **modal-particle density exceeds native** on both languages (NB: 8.11 vs 1.81 per 1000 words; NN: 8.39 vs 2.79). It overcorrects toward "feels Norwegian" by sprinkling "jo, da, vel" much more aggressively than native writers do.
+- Gemma's **connective density is also above native** on both languages (NB: 6.84 vs 3.62; NN: 5.93 vs 3.27), pushing eksplisittering into mid-0.4 range. The model spells out logic more than native writers, a classic translatese marker.
+- **Qwen 3B's compound integrity drops to 0.85 (NB)** under the new dictionary-backed detector (v1.x reported 1.0). The vocabulary lookup picks up real särskriving errors in the Qwen 3B output that the v1.x prefix list missed.
+- Both Qwen models continue to collapse on the Bokmaal-to-Nynorsk transition. Qwen 3B's NN modal-particle rate falls to 0.15 per 1000 words against a native NN baseline of 2.79 per 1000 words: when prompted in Nynorsk, the model continues to write in Bokmaal-shaped prose with NN orthography sprinkled on top.
 
 To submit a new model to either leaderboard, see [CONTRIBUTING.md](CONTRIBUTING.md). Submissions go under `data/outputs/<model_id>/` for Bokmaal and `data/outputs_nn/<model_id>/` for Nynorsk. Either or both languages may be submitted in the same PR.
 
@@ -141,26 +142,24 @@ All prompts ask for 200 to 300 words. The same prompts run for every benchmarked
 
 ## Example scorecard
 
-After running on Qwen 2.5 Instruct 1.5B and 3B (greedy decoding, single seed):
+After running on Qwen 2.5 Instruct 1.5B and 3B against the v2.0 native baseline (greedy decoding, single seed):
 
 | Model | composite | explicitation | normalization | simplification | levelling | interference |
 |---|---:|---:|---:|---:|---:|---:|
-| qwen25-1_5b-instruct | **0.397** | 0.661 | 0.263 | 0.050 | 0.250 | 0.760 |
-| qwen25-3b-instruct | **0.349** | 0.777 | 0.214 | 0.007 | 0.074 | 0.673 |
+| qwen25-1_5b-instruct | **0.371** | 0.661 | 0.263 | 0.050 | 0.250 | 0.630 |
+| qwen25-3b-instruct | **0.293** | 0.777 | 0.214 | 0.007 | 0.074 | 0.390 |
 
-The standout signal is the simplification axis (0.05 and 0.007 against a tolerance calibrated to native variance). Both models repeat themselves heavily within 1000-token windows. MTTR-1000 of 0.18 and 0.28 against a native baseline of 0.55 quantifies what manual inspection of any specific output confirms: the models cycle through a narrow vocabulary and reuse phrases.
+The standout signal is still the simplification axis (0.05 and 0.007). Both models repeat themselves heavily, and v2.0's MTTR-100 (a stable window for 200 to 400 word outputs) makes the magnitude unambiguous: Qwen 1.5B and Qwen 3B sit at 0.26 and 0.40 against a native baseline of 0.72. The interferens axis drops for Qwen 3B in particular under v2.0 because the new vocabulary-backed compound detector picks up real särskriving errors that the v1.x prefix list missed.
 
 ## Limitations
 
-The V2 violation heuristic is noisy. The current implementation uses spaCy's dependency parser to count syntactic constituents before the main verb. Imperatives, questions, and sentence fragments all flag as "violations" by this heuristic. The native baseline therefore shows a 34% violation rate, which is above what a careful V2-only count would yield. Relative model-to-baseline comparison is still meaningful, but the absolute number should not be read as "this percent of clauses violate V2." A better implementation would filter to declarative main clauses only.
+The V2 violation heuristic is still noisy on absolute terms. v2.0 filters out interrogatives, imperatives, and sentence fragments (issue [#1](https://github.com/tenki-labs/nori/issues/1)), which drops the native baseline from 34 percent in v1.0 to 30 percent (Bokmaal) and 17 percent (Nynorsk). The remaining noise is parser-side: the spaCy dependency parser sometimes attaches topicalized phrases as multiple constituents, inflating the "things before the verb" count. Relative model-to-baseline comparison is meaningful, but the absolute V2 rate should not be read as "this percent of clauses violate V2." A more precise implementation would inspect spaCy constituent boundaries directly rather than counting child tokens.
 
-The reference corpus has translation drift. Norwegian Wikipedia includes some articles that are translated from English versions. Project Gutenberg supplements with unambiguously native literature, but skews older. A future iteration should add modern newspaper editorials (for example via the National Library of Norway's bokhylla.no archive under research license) to the reference.
+The reference corpus has translation drift. Norwegian Wikipedia includes some articles that are translated from English versions. Project Gutenberg supplements with unambiguously native literature, but skews older. A future iteration should add modern newspaper editorials (for example via the National Library of Norway's bokhylla.no archive under research license) to the reference. The v2.0 `--baseline-mapping` flag (issue [#5](https://github.com/tenki-labs/nori/issues/5)) lets you score against Wikipedia and Gutenberg separately rather than the combined distribution.
 
-There is no native-speaker calibration yet. The composite score's tolerances are chosen empirically from the reference corpus's distribution. They have not been calibrated against human "this feels native vs translated" judgments. A natural next step is to collect such judgments on 100 to 200 outputs and tune tolerances against them. Until then, NORI scores are *relative* numbers against the specific native reference we built; they are useful for comparing models against each other, less useful as standalone quality claims.
+There is no native-speaker calibration of tolerances yet. The composite score's tolerances are chosen empirically from the reference corpus's distribution. They have not been calibrated against human "this feels native vs translated" judgments. The v2.0 `--human` scoring path (issue [#3](https://github.com/tenki-labs/nori/issues/3)) is ready to anchor the leaderboard against native human writers; the shipped release does not yet include human-written outputs. Until human writers are added, NORI scores are *relative* numbers against the specific native reference we built; they are useful for comparing models against each other, less useful as standalone quality claims.
 
-NORI evaluates Bokmaal only. Nynorsk has different stylistic conventions, requires its own reference corpus, and is not currently measured. The five-axis framework is language-independent; building NORI-NN is mostly a matter of corpus and tolerance recalibration.
-
-The decoder is greedy by default. Sampling temperature is 0 to make the benchmark deterministic. Models may produce different output under sampling; this is unmeasured.
+The decoder is greedy by default. Sampling temperature is 0 to make the benchmark deterministic. Sampling-decode evaluation (issue [#9](https://github.com/tenki-labs/nori/issues/9)) is tracked for a future release. Multi-seed evaluation infrastructure is shipped in v2.0 via the `--seeds` flag (issue [#4](https://github.com/tenki-labs/nori/issues/4)); submitters can opt in to multi-seed generation today.
 
 ## Layout
 

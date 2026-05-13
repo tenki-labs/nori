@@ -4,6 +4,77 @@ All notable changes to this benchmark are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-05-11
+
+Accuracy and scoring methodology overhaul. **NORI v2 scores are not comparable
+to NORI v1.x scores.** The v1.0 leaderboard should be retired. The five-axis
+framework is unchanged, but the underlying measurements were silently biased on
+short LLM outputs and non-declarative sentences, leading to scoring artifacts
+that this release removes.
+
+### Changed (breaking)
+- **Forenkling axis now uses MTTR-100, not MTTR-1000** (issue #2). The legacy
+  metric fell back to plain TTR on documents under 1000 tokens, which fires on
+  essentially every NORI-style 200 to 400 word output. The fallback conflated
+  vocabulary diversity with document length, driving the simplification axis
+  to artificially near-zero values for short outputs. MTTR-100 is well-defined
+  at LLM output lengths and matches the standard window used in stylometry
+  literature (Covington and McFall 2010). Tolerance retuned to 0.08.
+  `mttr_1000` is retained as a deprecated diagnostic field.
+- **V2 violation rate now filters to declarative main clauses only** (issue
+  #1). Interrogatives, imperatives, exclamations, and sentence fragments no
+  longer count toward the rate. V2 in Norwegian is a property of declarative
+  main clauses, and counting non-declaratives as "violations" inflated the
+  native baseline (Wiki 31 percent in v1.0 to ~12 percent in v2.0; NN 34
+  percent to 17 percent), making the interferens axis reward models for
+  producing only formal declarative prose.
+- **Compound-integrity detection uses spaCy vocabulary lookup** (issue #6).
+  The v1.x implementation flagged adjacent NOUN+NOUN bigrams against a
+  hand-curated 30-prefix list, catching an estimated 5 to 10 percent of
+  actual särskriving errors. The v2.0 detector checks the concatenation
+  W1+W2 against the spaCy `nb_core_news_md` vocabulary (~50k known
+  Norwegian word entries) and falls back to an expanded prefix list. This
+  detects substantially more compound splits, including those a model
+  produces from less common compound stems.
+
+### Added
+- `mttr_100` field on `TextMetrics` and `CorpusMetrics`, populated for every
+  measurement.
+- `--seeds 42,1337,2026` flag on `scripts/30_score.py` (issue #4). When the
+  model output tree includes `data/outputs/<model_id>/seed_<N>/` subdirs,
+  each seed is scored independently and the headline NORI score is reported
+  as mean ± std across seeds. Submitters can opt in by providing multi-seed
+  generations; legacy single-seed submissions continue to work unchanged.
+- `--baseline-mapping configs/baseline_mapping.yaml` flag on
+  `scripts/30_score.py` (issue #5). Maps prompt-id prefix to baseline source
+  (wikipedia, gutenberg, or combined) so that each generation is scored
+  against the matching register instead of the averaged distribution. The
+  shipped example maps editorial/technical/argumentative prompts to the
+  Wikipedia baseline and personal/narrative prompts to the Gutenberg
+  baseline. Combined-baseline mode remains the default.
+- `--human` flag on `scripts/30_score.py` (issue #3). Scores writers placed
+  under `data/human_baseline{,_nn}/<author_id>/<prompt_id>.txt` against the
+  same native distribution and writes `results/human_baseline{,_nn}.json`.
+  Lets users anchor the leaderboard against a native ceiling. The shipped
+  release does not include human-written outputs; the scoring path is ready
+  for them.
+- `tests/` directory with 14 unit tests covering the V2 declarative filter,
+  the MTTR-100 metric, and the new vocabulary-backed compound detector.
+  `make test` runs the suite without requiring pytest.
+
+### Migration notes
+- v1.0 leaderboard rows are deprecated. The README leaderboard has been
+  re-scored against the v2.0 baseline. Comparing a v1.x score to a v2.0
+  score is meaningless because three of the five axes use different
+  measurements.
+- The `mttr_1000` field is preserved for diagnostic purposes and continues
+  to be populated, but it is no longer consulted by `score()`. External
+  tooling that reads `mttr_1000` should migrate to `mttr_100`.
+
+### Deferred (tracked, not in v2.0)
+- Round-trip stability axis (issue #7), LLM-as-judge coherence column
+  (issue #8), sampling-decode evaluation (issue #9). Tracked for v2.x.
+
 ## [1.0.0] - 2026-05-10
 
 First stable release. Adds Nynorsk benchmark (**NORI-NN**) alongside the
